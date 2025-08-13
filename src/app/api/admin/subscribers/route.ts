@@ -3,19 +3,16 @@ import { createServerClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    // Verificar autenticación admin
     const adminSession = request.cookies.get('admin_session')
     if (!adminSession) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
     const supabase = createServerClient()
-
-    // Obtener todos los suscriptores
     const { data: subscribers, error } = await supabase
       .from('subscribers')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('subscribed_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching subscribers:', error)

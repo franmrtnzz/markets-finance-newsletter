@@ -1,118 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { sendEmail } from '@/lib/sendgrid'
-import { v4 as uuidv4 } from 'uuid'
-import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { email, website } = body
+    const { email, honeypot } = await request.json()
 
-    // Honeypot check
-    if (website) {
-      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    // Validación básica
+    if (!email || typeof email !== 'string') {
+      return NextResponse.json({ error: 'Email requerido' }, { status: 400 })
     }
 
-    // Basic email validation
-    if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: 'Email inválido' }, { status: 400 })
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Formato de email inválido' }, { status: 400 })
     }
 
-    // Rate limiting (simple in-memory for demo, use Redis in production)
-    const clientIP = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
-    const rateLimitKey = `subscribe:${clientIP}`
-    
-    // Check if IP has made too many requests recently
-    // This is a simplified version - in production use Redis or similar
-    
+    // Honeypot check (anti-spam)
+    if (honeypot) {
+      return NextResponse.json({ error: 'Solicitud inválida' }, { status: 400 })
+    }
+
     const supabase = createServerClient()
 
-    // Check if email already exists
-    const { data: existingSubscriber } = await supabase
+    // Verificar si ya existe
+    const { data: existing } = await supabase
       .from('subscribers')
-      .select('id, status')
+      .select('id, is_active')
       .eq('email', email.toLowerCase())
       .single()
 
-    if (existingSubscriber) {
-      if (existingSubscriber.status === 'active') {
-        return NextResponse.json({ error: 'Ya estás suscrito' }, { status: 400 })
+    if (existing) {
+      if (existing.is_active) {
+        return NextResponse.json({ 
+          message: 'Ya estás suscrito a nuestra newsletter',
+          alreadySubscribed: true 
+        })
+      } else {
+        // Reactivar suscripción
+        const { error: updateError } = await supabase
+          .from('subscribers')
+          .update({ 
+            is_active: true, 
+            subscribed_at: new Date().toISOString(),
+            unsubscribe_token: crypto.randomUUID()
+          })
+          .eq('id', existing.id)
+
+        if (updateError) {
+          console.error('Error reactivando suscripción:', updateError)
+          return NextResponse.json({ error: 'Error al reactivar suscripción' }, { status: 500 })
+        }
+
+        return NextResponse.json({ 
+          message: '¡Bienvenido de vuelta! Tu suscripción ha sido reactivada',
+          reactivated: true 
+        })
       }
-      
-      if (existingSubscriber.status === 'pending') {
-        return NextResponse.json({ error: 'Revisa tu email para confirmar la suscripción' }, { status: 400 })
-      }
     }
 
-    // Generate confirmation token
-    const token = uuidv4()
-    const tokenHash = await bcrypt.hash(token, 10)
+    // Crear nueva suscripción
+    const { error: insertError } = await supabase
+      .from('subscribers')
+      .insert({
+        email: email.toLowerCase(),
+        unsubscribe_token: crypto.randomUUID()
+      })
 
-    // Create or update subscriber
-    const subscriberData = {
-      email: email.toLowerCase(),
-      status: 'pending',
-      token_hash: tokenHash,
-      source: 'web_form',
-      consent_ts: new Date().toISOString()
-    }
-
-    let subscriberId: string
-
-    if (existingSubscriber) {
-      // Update existing subscriber
-      const { data, error } = await supabase
-        .from('subscribers')
-        .update(subscriberData)
-        .eq('id', existingSubscriber.id)
-        .select('id')
-        .single()
-
-      if (error) throw error
-      subscriberId = data.id
-    } else {
-      // Create new subscriber
-      const { data, error } = await supabase
-        .from('subscribers')
-        .insert(subscriberData)
-        .select('id')
-        .single()
-
-      if (error) throw error
-      subscriberId = data.id
-    }
-
-    // Send confirmation email
-    const confirmationUrl = `${process.env.BASE_URL}/confirm?token=${token}`
-    
-    const emailResult = await sendEmail({
-      to: email,
-      subject: 'Confirma tu suscripción - Markets & Finance',
-      html: `
-        <h2>¡Bienvenido a Markets & Finance!</h2>
-        <p>Para confirmar tu suscripción, haz clic en el siguiente enlace:</p>
-        <p><a href="${confirmationUrl}">Confirmar suscripción</a></p>
-        <p>Si no solicitaste esta suscripción, puedes ignorar este email.</p>
-      `
-    })
-
-    if (!emailResult.success) {
-      // Delete the subscriber if email fails
-      await supabase
-        .from('subscribers')
-        .delete()
-        .eq('id', subscriberId)
-      
-      return NextResponse.json({ error: 'Error al enviar email de confirmación' }, { status: 500 })
+    if (insertError) {
+      console.error('Error creando suscripción:', insertError)
+      return NextResponse.json({ error: 'Error al crear suscripción' }, { status: 500 })
     }
 
     return NextResponse.json({ 
-      message: 'Suscripción creada. Revisa tu email para confirmar.' 
+      message: '¡Te has suscrito exitosamente a Markets & Finance!',
+      success: true 
     })
 
   } catch (error) {
-    console.error('Subscription error:', error)
+    console.error('Error inesperado:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 } 

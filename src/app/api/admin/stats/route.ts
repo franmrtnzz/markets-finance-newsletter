@@ -1,37 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { cookies } from 'next/headers'
 
 export async function GET(request: NextRequest) {
   try {
-    // Check admin session
-    const cookieStore = cookies()
-    const adminSession = cookieStore.get('admin_session')
-    
-    if (!adminSession || adminSession.value !== 'authenticated') {
+    const adminSession = request.cookies.get('admin_session')
+    if (!adminSession) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
     const supabase = createServerClient()
 
-    // Get subscriber stats
+    // Obtener estadísticas de suscriptores
     const { data: subscribers, error: subscribersError } = await supabase
       .from('subscribers')
-      .select('status')
+      .select('is_active')
 
-    if (subscribersError) throw subscribersError
+    if (subscribersError) {
+      console.error('Error fetching subscribers:', subscribersError)
+      return NextResponse.json({ error: 'Error al obtener suscriptores' }, { status: 500 })
+    }
 
-    // Get issue stats
+    // Obtener estadísticas de newsletters
     const { data: issues, error: issuesError } = await supabase
       .from('issues')
       .select('status')
 
-    if (issuesError) throw issuesError
+    if (issuesError) {
+      console.error('Error fetching issues:', issuesError)
+      return NextResponse.json({ error: 'Error al obtener newsletters' }, { status: 500 })
+    }
 
-    // Calculate stats
+    // Calcular estadísticas
     const totalSubscribers = subscribers?.length || 0
-    const activeSubscribers = subscribers?.filter(s => s.status === 'active').length || 0
-    const pendingSubscribers = subscribers?.filter(s => s.status === 'pending').length || 0
+    const activeSubscribers = subscribers?.filter(s => s.is_active).length || 0
+    const inactiveSubscribers = totalSubscribers - activeSubscribers
 
     const totalIssues = issues?.length || 0
     const draftIssues = issues?.filter(i => i.status === 'draft').length || 0
@@ -39,17 +41,21 @@ export async function GET(request: NextRequest) {
     const sentIssues = issues?.filter(i => i.status === 'sent').length || 0
 
     return NextResponse.json({
-      totalSubscribers,
-      activeSubscribers,
-      pendingSubscribers,
-      totalIssues,
-      draftIssues,
-      scheduledIssues,
-      sentIssues
+      subscribers: {
+        total: totalSubscribers,
+        active: activeSubscribers,
+        inactive: inactiveSubscribers
+      },
+      issues: {
+        total: totalIssues,
+        draft: draftIssues,
+        scheduled: scheduledIssues,
+        sent: sentIssues
+      }
     })
 
   } catch (error) {
-    console.error('Stats error:', error)
+    console.error('Unexpected error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 } 

@@ -6,29 +6,23 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar autenticación admin
     const adminSession = request.cookies.get('admin_session')
     if (!adminSession) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
     const { id } = params
-    const { status } = await request.json()
+    const { isActive } = await request.json()
 
-    // Validar estado
-    if (!['pending', 'active', 'unsubscribed'].includes(status)) {
+    if (typeof isActive !== 'boolean') {
       return NextResponse.json({ error: 'Estado inválido' }, { status: 400 })
     }
 
     const supabase = createServerClient()
+    const updateData: any = { is_active: isActive }
 
-    // Actualizar estado del suscriptor
-    const updateData: any = { status }
-    
-    if (status === 'active') {
-      updateData.confirmed_at = new Date().toISOString()
-    } else if (status === 'unsubscribed') {
-      updateData.unsubscribed_at = new Date().toISOString()
+    if (isActive) {
+      updateData.subscribed_at = new Date().toISOString()
     }
 
     const { error } = await supabase
