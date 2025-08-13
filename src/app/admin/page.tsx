@@ -144,7 +144,7 @@ export default function AdminDashboard() {
 
           {/* Crear Newsletter */}
           <Link
-            href="/admin/issues/new"
+            href="/admin/newsletter/send"
             className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
           >
             <div className="flex items-center">
