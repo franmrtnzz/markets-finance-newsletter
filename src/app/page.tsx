@@ -82,7 +82,7 @@ export default function Home() {
                   </p>
                   <ul className="list-disc list-inside space-y-1 ml-2">
                     <li>Revisar tu carpeta de Spam en las horas cercanas a la publicación</li>
-                    <li>Marcar el email como "No es Spam" para evitar que vuelva a ocurrir</li>
+                    <li>Marcar el email como &quot;No es Spam&quot; para evitar que vuelva a ocurrir</li>
                   </ul>
                 </div>
               </div>
