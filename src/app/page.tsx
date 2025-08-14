@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -8,8 +8,8 @@ export default function Home() {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [backgroundImage, setBackgroundImage] = useState('')
 
-  // Array de imágenes de fondo (por ahora con placeholders, se actualizarán con las reales)
-  const backgroundImages = [
+  // Array de imágenes de fondo de finanzas (memoizado para evitar re-renders)
+  const backgroundImages = useMemo(() => [
     '/images/backgrounds/nyse-trading-floor.jpg',
     '/images/backgrounds/skyscrapers.jpg',
     '/images/backgrounds/finance-3.jpg',
@@ -25,12 +25,7 @@ export default function Home() {
     '/images/backgrounds/finance-13.jpg',
     '/images/backgrounds/finance-14.jpg',
     '/images/backgrounds/finance-15.jpg',
-    '/images/backgrounds/finance-16.jpg',
-    '/images/backgrounds/finance-17.jpg',
-    '/images/backgrounds/finance-18.jpg',
-    '/images/backgrounds/finance-19.jpg',
-    '/images/backgrounds/finance-20.jpg',
-  ]
+  ], [])
 
   // Seleccionar imagen aleatoria al cargar la página
   useEffect(() => {
