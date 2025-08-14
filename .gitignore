@@ -21,10 +21,13 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # Local env files
 .env*.local
 .env
+.env.production
+.env.development
 
 # Vercel
 .vercel
@@ -40,4 +43,12 @@ next-env.d.ts
 *.swo
 
 # Logs
-*.log 
+*.log
+
+# OS
+Thumbs.db
+ehthumbs.db
+
+# Temporary files
+*.tmp
+*.temp 

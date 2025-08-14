@@ -1,93 +1,102 @@
 # Markets & Finance Newsletter
 
-Plataforma sencilla y gratuita para gestionar suscriptores y enviar newsletters semanales.
+A modern, production-ready newsletter platform built with Next.js 14, featuring subscriber management, admin panel, and automated email delivery.
 
-## 🚀 Características
+## Features
 
-- **Suscripción con doble opt-in** (RGPD compliant)
-- **Panel admin** para gestionar suscriptores y newsletters
-- **Envío automático** programado para domingos a las 09:00 (Madrid)
-- **Plantillas MJML** para emails responsivos
-- **Gestión de rebotes y bajas** automática
-- **Archivo público** para ver newsletters en web
-- **Coste 0€** - solo planes gratuitos
+- **Subscriber Management**: Direct subscription system with unsubscribe functionality
+- **Admin Panel**: Content creation and subscriber management interface
+- **Email Delivery**: SendGrid integration with domain authentication
+- **Responsive Design**: Modern UI built with Tailwind CSS
+- **Type Safety**: Full TypeScript implementation
+- **Security**: CSRF protection, rate limiting, and honeypot anti-spam
 
-## 🛠️ Stack Tecnológico
+## Tech Stack
 
-- **Frontend**: Next.js 14 + Tailwind CSS
-- **Base de datos**: Supabase (PostgreSQL)
-- **Email**: SendGrid (100 emails/día gratis)
-- **Hosting**: Vercel + Vercel Cron
-- **Node.js**: v22 LTS (ARM64 compatible)
+- **Frontend**: Next.js 14 (App Router), React 18, Tailwind CSS
+- **Backend**: Next.js API Routes, Supabase (PostgreSQL)
+- **Email**: SendGrid with domain authentication
+- **Authentication**: Password-based admin system with httpOnly cookies
+- **Deployment**: Vercel with custom domain support
+- **Package Manager**: pnpm
 
-## 📋 Requisitos Previos
+## Architecture
 
-- Node.js 22+ (ARM64 compatible)
-- Cuenta en [Supabase](https://supabase.com) (gratis)
-- Cuenta en [SendGrid](https://sendgrid.com) (gratis)
-- Cuenta en [Vercel](https://vercel.com) (gratis)
-
-## ⚙️ Instalación
-
-### 1. Clonar y instalar dependencias
-
-```bash
-# Usar pnpm (recomendado)
-pnpm install
-
-# O npm
-npm install
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API endpoints
+│   │   ├── admin/         # Admin-only endpoints
+│   │   ├── subscribe/     # Subscription endpoint
+│   │   └── unsubscribe/   # Unsubscribe endpoint
+│   ├── admin/             # Admin panel pages
+│   └── page.tsx           # Public subscription page
+├── lib/                   # Utility libraries
+│   ├── supabase.ts        # Supabase client configuration
+│   └── sendgrid.ts        # SendGrid email service
+└── types/                 # TypeScript type definitions
 ```
 
-### 2. Configurar variables de entorno
+## Getting Started
 
-Copia `env.example` a `.env.local` y rellena:
+### Prerequisites
 
+- Node.js 22+ 
+- pnpm
+- Supabase account
+- SendGrid account
+- Custom domain (for email authentication)
+
+### Installation
+
+1. Clone the repository
 ```bash
+git clone https://github.com/yourusername/markets-finance-newsletter.git
+cd markets-finance-newsletter
+```
+
+2. Install dependencies
+```bash
+pnpm install
+```
+
+3. Set up environment variables
+```bash
+cp env.example .env.local
+```
+
+4. Configure your environment variables
+```env
 # Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://[TU_PROYECTO].supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=[CLAVE_ANONIMA_PUBLICA]
-SUPABASE_SERVICE_ROLE_KEY=[CLAVE_SERVICIO_PRIVADA]
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # SendGrid
-SENDGRID_API_KEY=[TU_API_KEY]
-SENDGRID_FROM_EMAIL=noreply@[tuapp].vercel.app
-SENDGRID_FROM_NAME="Markets & Finance"
+SENDGRID_API_KEY=your_sendgrid_api_key
+SENDGRID_FROM_EMAIL=noreply@yourdomain.com
 
 # Admin
-ADMIN_PASSWORD=[TU_CONTRASEÑA_ADMIN]
-
-# App
-BASE_URL=https://[tuapp].vercel.app
-TIMEZONE=Europe/Madrid
+ADMIN_PASSWORD=your_secure_password
+BASE_URL=https://yourdomain.com
 ```
 
-### 3. Configurar Supabase
-
-Ejecuta este SQL en tu proyecto Supabase:
-
+5. Set up database schema
 ```sql
--- Tabla de suscriptores
+-- Run this in your Supabase SQL Editor
 CREATE TABLE subscribers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
-  status TEXT CHECK (status IN ('pending','active','unsubscribed','bounced','spam')) DEFAULT 'pending',
-  token_hash TEXT,
-  consent_ts TIMESTAMPTZ,
-  source TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  unsubscribed_at TIMESTAMPTZ,
-  last_sent_at TIMESTAMPTZ,
-  bounce_reason TEXT
+  subscribed_at TIMESTAMPTZ DEFAULT NOW(),
+  unsubscribe_token TEXT UNIQUE DEFAULT gen_random_uuid()::text,
+  is_active BOOLEAN DEFAULT true
 );
 
--- Tabla de newsletters
 CREATE TABLE issues (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT UNIQUE,
   title TEXT,
   preheader TEXT,
-  source_url TEXT,
   content_md TEXT,
   html TEXT,
   status TEXT CHECK (status IN ('draft','scheduled','sent','failed')) DEFAULT 'draft',
@@ -96,129 +105,76 @@ CREATE TABLE issues (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Tabla de envíos
-CREATE TABLE sends (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  issue_id UUID REFERENCES issues(id),
-  subscriber_id UUID REFERENCES subscribers(id),
-  status TEXT CHECK (status IN ('queued','sent','bounced','spam','unsub')) DEFAULT 'queued',
-  provider_message_id TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ
-);
-
--- Habilitar RLS
-ALTER TABLE issues ENABLE ROW LEVEL SECURITY;
-CREATE POLICY public_read_sent ON issues FOR SELECT USING (status='sent');
+-- Enable RLS and create policies
 ALTER TABLE subscribers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sends ENABLE ROW LEVEL SECURITY;
+ALTER TABLE issues ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY public_subscribe ON subscribers FOR INSERT WITH CHECK (true);
+CREATE POLICY public_read_active ON subscribers FOR SELECT USING (is_active = true);
+CREATE POLICY admin_subscribers ON subscribers FOR ALL USING (true);
+CREATE POLICY admin_issues ON issues FOR ALL USING (true);
 ```
 
-### 4. Ejecutar en desarrollo
-
+6. Run the development server
 ```bash
 pnpm dev
 ```
 
-## 📧 Configuración de SendGrid
-
-1. Crea cuenta en [SendGrid](https://sendgrid.com)
-2. Verifica tu dominio o usa Single Sender
-3. Genera API Key con permisos de "Mail Send"
-4. Configura webhook para rebotes/bajas (opcional)
-
-## 🕐 Cron Job
-
-El newsletter se programa automáticamente para **domingos a las 08:00 UTC** (09:00 Madrid invierno, 10:00 verano).
-
-Configuración en `vercel.json`:
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/send-scheduled",
-      "schedule": "0 8 * * 0"
-    }
-  ]
-}
-```
-
-## 📱 Uso
-
-### Panel Admin
-- **Login**: `/admin/login`
-- **Dashboard**: `/admin`
-- **Suscriptores**: `/admin/subscribers`
-- **Newsletters**: `/admin/issues`
-
-### Funcionalidades
-1. **Pegar contenido MD/HTML** en `/admin/issues/new`
-2. **Previsualizar** antes de enviar
-3. **Enviar ahora** o **Programar** para domingo
-4. **Importar/Exportar** suscriptores en CSV
-
-### Límites Gratuitos
-- **SendGrid**: 100 emails/día
-- **Supabase**: 500MB, 50,000 filas
-- **Vercel**: 100GB bandwidth
-
-## 🔒 Seguridad
-
-- **RLS** activo en todas las tablas
-- **CSRF** en formularios admin
-- **Rate limiting** en APIs
-- **Honeypot** en suscripciones
-- **Cookies httpOnly** para sesiones
-
-## 🚨 Troubleshooting
-
-### Errores comunes:
-- **"Cannot find module"**: Ejecuta `pnpm install`
-- **"ADMIN_PASSWORD not configured"**: Verifica `.env.local`
-- **"SendGrid API key invalid"**: Verifica API key y permisos
-- **"Supabase connection failed"**: Verifica URL y claves
-
-### Logs:
+7. Build for production
 ```bash
-# Ver logs de Vercel
-vercel logs
-
-# Logs locales
-pnpm dev
+pnpm build
 ```
 
-## 📚 Estructura del Proyecto
+## Deployment
 
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── api/               # API endpoints
-│   ├── admin/             # Panel admin
-│   └── globals.css        # Estilos globales
-├── lib/                   # Utilidades
-│   ├── supabase.ts        # Cliente Supabase
-│   ├── sendgrid.ts        # Config SendGrid
-│   └── mjml.ts           # Compilador MJML
-└── components/            # Componentes React
-```
+### Vercel
 
-## 🤝 Contribuir
+1. Connect your GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Deploy with automatic builds on push to main branch
 
-1. Fork el proyecto
-2. Crea rama: `git checkout -b feature/nueva-funcionalidad`
-3. Commit: `git commit -m 'Añadir funcionalidad'`
-4. Push: `git push origin feature/nueva-funcionalidad`
-5. Abre Pull Request
+### Domain Configuration
 
-## 📄 Licencia
+1. Add your custom domain in Vercel
+2. Configure nameservers to point to Vercel
+3. Set up SendGrid domain authentication
+4. Add SPF record: `v=spf1 include:sendgrid.net ~all`
 
-MIT License - ver [LICENSE](LICENSE) para detalles.
+## API Endpoints
 
-## 🆘 Soporte
+### Public Endpoints
 
-- **Issues**: [GitHub Issues](https://github.com/tu-usuario/markets-finance-newsletter/issues)
-- **Documentación**: [Wiki](https://github.com/tu-usuario/markets-finance-newsletter/wiki)
+- `POST /api/subscribe` - Subscribe to newsletter
+- `GET /api/unsubscribe/[token]` - Unsubscribe from newsletter
 
----
+### Admin Endpoints
 
-**Nota**: Esta plataforma está diseñada para ser **100% gratuita**. Si necesitas escalar más allá de los límites gratuitos, considera alternativas como SES, Mailgun, o planes de pago.
+- `POST /api/admin/login` - Admin authentication
+- `GET /api/admin/stats` - Dashboard statistics
+- `GET /api/admin/subscribers` - List subscribers
+- `POST /api/admin/newsletter/send` - Send newsletter
+
+## Security Features
+
+- **CSRF Protection**: Built-in Next.js CSRF protection
+- **Rate Limiting**: API endpoint rate limiting
+- **Honeypot**: Anti-spam honeypot field
+- **Input Validation**: Email format and content validation
+- **Row Level Security**: Supabase RLS policies
+- **Secure Cookies**: httpOnly admin session cookies
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support and questions, please open an issue in the GitHub repository.

@@ -1,13 +1,13 @@
 {
   "name": "markets-finance-newsletter",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "A modern, production-ready newsletter platform built with Next.js 14",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "dry-run": "echo 'TEST: Newsletter platform ready for testing'"
+    "lint": "next lint"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.0",
@@ -39,5 +39,15 @@
   },
   "engines": {
     "node": ">=22 <23"
-  }
+  },
+  "keywords": [
+    "newsletter",
+    "nextjs",
+    "supabase",
+    "sendgrid",
+    "typescript",
+    "tailwindcss"
+  ],
+  "author": "Markets & Finance Newsletter",
+  "license": "MIT"
 }
