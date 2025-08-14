@@ -1,11 +1,42 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
   const [email, setEmail] = useState('')
   const [honeypot, setHoneypot] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const [backgroundImage, setBackgroundImage] = useState('')
+
+  // Array de imágenes de fondo (por ahora con placeholders, se actualizarán con las reales)
+  const backgroundImages = [
+    '/images/backgrounds/nyse-trading-floor.jpg',
+    '/images/backgrounds/skyscrapers.jpg',
+    '/images/backgrounds/finance-3.jpg',
+    '/images/backgrounds/finance-4.jpg',
+    '/images/backgrounds/finance-5.jpg',
+    '/images/backgrounds/finance-6.jpg',
+    '/images/backgrounds/finance-7.jpg',
+    '/images/backgrounds/finance-8.jpg',
+    '/images/backgrounds/finance-9.jpg',
+    '/images/backgrounds/finance-10.jpg',
+    '/images/backgrounds/finance-11.jpg',
+    '/images/backgrounds/finance-12.jpg',
+    '/images/backgrounds/finance-13.jpg',
+    '/images/backgrounds/finance-14.jpg',
+    '/images/backgrounds/finance-15.jpg',
+    '/images/backgrounds/finance-16.jpg',
+    '/images/backgrounds/finance-17.jpg',
+    '/images/backgrounds/finance-18.jpg',
+    '/images/backgrounds/finance-19.jpg',
+    '/images/backgrounds/finance-20.jpg',
+  ]
+
+  // Seleccionar imagen aleatoria al cargar la página
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * backgroundImages.length)
+    setBackgroundImage(backgroundImages[randomIndex])
+  }, [backgroundImages])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,8 +80,20 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* Overlay para mejorar legibilidad */}
+      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      
+      {/* Contenido principal */}
+      <div className="relative z-10 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 max-w-md w-full border border-white/20">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -64,7 +107,7 @@ export default function Home() {
         {/* Warning sobre SPAM y Horario */}
         <div className="mb-6 space-y-4">
           {/* Warning sobre SPAM */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="bg-amber-50/90 border border-amber-200 rounded-lg p-4 backdrop-blur-sm">
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
@@ -90,7 +133,7 @@ export default function Home() {
           </div>
 
           {/* Horario de envío */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50/90 border border-blue-200 rounded-lg p-4 backdrop-blur-sm">
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -122,7 +165,7 @@ export default function Home() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white/80 backdrop-blur-sm"
               required
               disabled={isSubmitting}
             />
@@ -143,7 +186,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {isSubmitting ? 'Suscribiendo...' : 'Suscribirse'}
           </button>
@@ -151,12 +194,12 @@ export default function Home() {
 
         {/* Mensajes */}
         {message && (
-          <div className={`mt-4 p-4 rounded-lg ${
+          <div className={`mt-4 p-4 rounded-lg backdrop-blur-sm ${
             message.type === 'success' 
-              ? 'bg-green-50 text-green-800 border border-green-200' 
+              ? 'bg-green-50/90 text-green-800 border border-green-200' 
               : message.type === 'error'
-              ? 'bg-red-50 text-red-800 border border-red-200'
-              : 'bg-blue-50 text-blue-800 border border-blue-200'
+              ? 'bg-red-50/90 text-red-800 border border-red-200'
+              : 'bg-blue-50/90 text-blue-800 border border-blue-200'
           }`}>
             {message.text}
           </div>
