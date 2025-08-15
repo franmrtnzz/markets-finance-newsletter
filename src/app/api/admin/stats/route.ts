@@ -5,12 +5,15 @@ export async function GET(request: NextRequest) {
   try {
     const adminSession = request.cookies.get('admin_session')
     if (!adminSession) {
+      console.log('No admin session found')
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
+    console.log('Admin session found, fetching stats...')
     const supabase = createServerClient()
 
     // Obtener estadísticas de suscriptores
+    console.log('Fetching subscribers...')
     const { data: subscribers, error: subscribersError } = await supabase
       .from('subscribers')
       .select('is_active')
@@ -20,7 +23,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Error al obtener suscriptores' }, { status: 500 })
     }
 
+    console.log('Subscribers fetched:', subscribers?.length || 0)
+
     // Obtener estadísticas de newsletters
+    console.log('Fetching issues...')
     const { data: issues, error: issuesError } = await supabase
       .from('issues')
       .select('status')
@@ -29,6 +35,8 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching issues:', issuesError)
       return NextResponse.json({ error: 'Error al obtener newsletters' }, { status: 500 })
     }
+
+    console.log('Issues fetched:', issues?.length || 0)
 
     // Calcular estadísticas
     const totalSubscribers = subscribers?.length || 0
@@ -40,7 +48,7 @@ export async function GET(request: NextRequest) {
     const scheduledIssues = issues?.filter(i => i.status === 'scheduled').length || 0
     const sentIssues = issues?.filter(i => i.status === 'sent').length || 0
 
-    return NextResponse.json({
+    const stats = {
       subscribers: {
         total: totalSubscribers,
         active: activeSubscribers,
@@ -52,7 +60,10 @@ export async function GET(request: NextRequest) {
         scheduled: scheduledIssues,
         sent: sentIssues
       }
-    })
+    }
+
+    console.log('Stats calculated:', stats)
+    return NextResponse.json(stats)
 
   } catch (error) {
     console.error('Unexpected error:', error)

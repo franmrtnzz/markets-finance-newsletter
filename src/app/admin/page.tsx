@@ -19,12 +19,24 @@ interface Stats {
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     fetchStats()
+    
+    // Actualizar automáticamente cada 30 segundos
+    const interval = setInterval(() => {
+      fetchStats(false) // false = no mostrar loading
+    }, 30000)
+
+    return () => clearInterval(interval)
   }, [])
 
-  const fetchStats = async () => {
+  const fetchStats = async (showLoading = true) => {
+    if (showLoading) {
+      setLoading(true)
+    }
+    
     try {
       const response = await fetch('/api/admin/stats')
       if (response.ok) {
@@ -34,8 +46,16 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error fetching stats:', error)
     } finally {
-      setLoading(false)
+      if (showLoading) {
+        setLoading(false)
+      }
     }
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await fetchStats()
+    setRefreshing(false)
   }
 
   if (loading) {
@@ -52,11 +72,30 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard de Administración</h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona tu newsletter Markets & Finance
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard de Administración</h1>
+            <p className="text-gray-600 mt-2">
+              Gestiona tu newsletter Markets & Finance
+            </p>
+          </div>
+          
+          {/* Botón de actualización */}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors"
+          >
+            <svg 
+              className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>{refreshing ? 'Actualizando...' : 'Actualizar'}</span>
+          </button>
         </div>
 
         {/* Stats Grid */}
@@ -194,6 +233,10 @@ export default function AdminDashboard() {
             <div className="flex items-center text-sm text-gray-600">
               <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
               <span>Panel de administración operativo</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full mr-3"></div>
+              <span>Actualización automática cada 30 segundos</span>
             </div>
           </div>
         </div>
