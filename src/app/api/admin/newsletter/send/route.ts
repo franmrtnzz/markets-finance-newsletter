@@ -73,7 +73,6 @@ export async function POST(request: NextRequest) {
           </div>
           
           <div style="text-align: center; margin-top: 30px; padding: 20px; color: #7f8c8d; font-size: 14px;">
-            <p>Este email fue enviado a ${subscribers.length} suscriptores</p>
             <p>Para darte de baja, haz clic <a href="${process.env.BASE_URL || 'http://localhost:3000'}/unsubscribe/${subscriber.unsubscribe_token}">aquí</a></p>
           </div>
         </body>

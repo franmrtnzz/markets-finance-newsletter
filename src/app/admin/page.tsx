@@ -38,13 +38,22 @@ export default function AdminDashboard() {
     }
     
     try {
+      console.log('🔄 Fetching stats...')
       const response = await fetch('/api/admin/stats')
+      console.log('📡 Response status:', response.status)
+      console.log('📡 Response ok:', response.ok)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('📊 Stats data received:', data)
         setStats(data)
+      } else {
+        console.error('❌ Response not ok:', response.status, response.statusText)
+        const errorData = await response.json().catch(() => 'No error data')
+        console.error('❌ Error data:', errorData)
       }
     } catch (error) {
-      console.error('Error fetching stats:', error)
+      console.error('💥 Error fetching stats:', error)
     } finally {
       if (showLoading) {
         setLoading(false)
