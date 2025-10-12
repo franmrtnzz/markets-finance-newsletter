@@ -56,8 +56,8 @@ export default function AdminDashboard() {
       console.error('💥 Error fetching stats:', error)
     } finally {
       if (showLoading) {
-        setLoading(false)
-      }
+      setLoading(false)
+    }
     }
   }
 
@@ -83,10 +83,10 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard de Administración</h1>
-            <p className="text-gray-600 mt-2">
-              Gestiona tu newsletter Markets & Finance
-            </p>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard de Administración</h1>
+          <p className="text-gray-600 mt-2">
+            Gestiona tu newsletter Markets & Finance
+          </p>
           </div>
           
           {/* Botón de actualización */}

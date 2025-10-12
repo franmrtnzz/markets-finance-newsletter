@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -9,7 +9,24 @@ export default function SendNewsletter() {
   const [content, setContent] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
+  const [totalEmails, setTotalEmails] = useState<number | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    // Obtener total de emails (activos e inactivos) desde las estadísticas
+    const fetchCount = async () => {
+      try {
+        const res = await fetch('/api/admin/stats')
+        if (res.ok) {
+          const data = await res.json()
+          setTotalEmails(data.subscribers?.total ?? 0)
+        }
+      } catch (e) {
+        // ignorar
+      }
+    }
+    fetchCount()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +56,7 @@ export default function SendNewsletter() {
 
       if (response.ok) {
         setMessage({ 
-          text: `¡Newsletter enviado exitosamente a ${data.sentCount} suscriptores!`, 
+          text: `¡Newsletter enviado exitosamente a ${data.sentCount} direcciones!`, 
           type: 'success' 
         })
         
@@ -71,7 +88,7 @@ export default function SendNewsletter() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Enviar Newsletter</h1>
               <p className="text-gray-600 mt-2">
-                Crea y envía tu newsletter semanal a todos los suscriptores activos
+                Crea y envía tu newsletter semanal a <strong>todas las direcciones registradas</strong>
               </p>
             </div>
             <Link
@@ -175,9 +192,9 @@ export default function SendNewsletter() {
             ⚠️ Importante
           </h3>
           <ul className="text-blue-800 space-y-2">
-            <li>• El newsletter se enviará <strong>inmediatamente</strong> a todos los suscriptores activos</li>
+            <li>• El newsletter se enviará <strong>inmediatamente</strong> a <strong>todas las direcciones registradas</strong></li>
             <li>• Esta acción <strong>no se puede deshacer</strong></li>
-            <li>• Se enviará a <strong>6 suscriptores activos</strong> actualmente</li>
+            <li>• Se enviará a <strong>{totalEmails ?? '...'}</strong> direcciones actualmente</li>
             <li>• El contenido se guardará en la base de datos para futuras referencias</li>
           </ul>
         </div>

@@ -17,11 +17,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient()
 
-    // 1. Obtener todos los suscriptores activos
+    // 1. Obtener todos los suscriptores (activos e inactivos)
     const { data: subscribers, error: subscribersError } = await supabase
       .from('subscribers')
       .select('id, email, unsubscribe_token')
-      .eq('is_active', true)
 
     if (subscribersError) {
       console.error('Error fetching subscribers:', subscribersError)
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!subscribers || subscribers.length === 0) {
-      return NextResponse.json({ error: 'No hay suscriptores activos' }, { status: 400 })
+      return NextResponse.json({ error: 'No hay suscriptores en la base de datos' }, { status: 400 })
     }
 
     // 2. Crear el newsletter en la base de datos
@@ -82,11 +81,26 @@ export async function POST(request: NextRequest) {
 
     // 4. Enviar emails (simplificado)
     try {
-      await sendBulkEmails(emails)
+      console.log(`📧 Enviando newsletter a ${emails.length} direcciones...`)
+      console.log(`📧 Emails a enviar:`, emails.map(e => e.to).join(', '))
+      
+      const sendResults = await sendBulkEmails(emails)
+      
+      console.log(`📧 Resultados del envío:`, sendResults)
+      
+      const successCount = sendResults.filter(r => r.success).length
+      const failCount = sendResults.filter(r => !r.success).length
+      
+      console.log(`📧 Enviados exitosamente: ${successCount}, Fallidos: ${failCount}`)
+      
+      if (failCount > 0) {
+        console.warn(`⚠️ ${failCount} emails fallaron en el envío`)
+      }
+      
     } catch (sendError) {
       // Si falla el envío, eliminar el newsletter creado
       await supabase.from('issues').delete().eq('id', issue.id)
-      console.error('Error sending emails:', sendError)
+      console.error('❌ Error sending emails:', sendError)
       return NextResponse.json({ error: 'Error al enviar emails' }, { status: 500 })
     }
 
@@ -110,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true,
-      message: `Newsletter enviado exitosamente a ${subscribers.length} suscriptores`,
+      message: `Newsletter enviado exitosamente a ${subscribers.length} direcciones`,
       issueId: issue.id,
       sentCount: subscribers.length
     })
