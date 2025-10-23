@@ -71,8 +71,15 @@ export async function POST(request: NextRequest) {
             ${content}
           </div>
           
-          <div style="text-align: center; margin-top: 30px; padding: 20px; color: #7f8c8d; font-size: 14px;">
-            <p>Para darte de baja, haz clic <a href="${process.env.BASE_URL || 'http://localhost:3000'}/unsubscribe/${subscriber.unsubscribe_token}">aquí</a></p>
+          <div style="text-align: center; margin-top: 30px; padding: 20px; color: #7f8c8d; font-size: 14px; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0 0 10px 0;">¿Ya no quieres recibir nuestros emails?</p>
+            <a href="${process.env.BASE_URL || 'http://localhost:3000'}/unsubscribe/${subscriber.unsubscribe_token}" 
+               style="display: inline-block; background: #f3f4f6; color: #6b7280; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; border: 1px solid #d1d5db;">
+              Darse de baja
+            </a>
+            <p style="margin: 10px 0 0 0; font-size: 12px;">
+              Markets & Finance Newsletter
+            </p>
           </div>
         </body>
         </html>
