@@ -130,7 +130,16 @@ export const sendEmail = async (emailData: EmailData, useTemporaryGroup: boolean
       }
 
       const groupData = await createGroupResponse.json()
-      tempGroupId = groupData.data?.id || groupData.id
+      tempGroupId = groupData.data?.id || groupData.id || null
+      
+      if (!tempGroupId) {
+        return {
+          success: false,
+          error: 'No se pudo obtener el ID del grupo temporal',
+          email: emailData.to
+        }
+      }
+      
       // Temporarily set the group ID environment variable
       process.env.MAILERLITE_GROUP_ID = tempGroupId
       console.log(`✅ Grupo temporal creado: ${tempGroupId}`)
