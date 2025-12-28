@@ -65,7 +65,18 @@ async function testNewsletter() {
       })
     });
 
-    const result = await testResponse.json();
+    const responseText = await testResponse.text();
+    console.log(`📋 Status: ${testResponse.status}`);
+    console.log(`📋 Response: ${responseText.substring(0, 500)}`);
+    
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (e) {
+      console.error('❌ Error parseando respuesta JSON:', e.message);
+      console.error('📋 Respuesta completa:', responseText);
+      process.exit(1);
+    }
 
     if (testResponse.ok && result.success) {
       console.log('✅ Email de prueba enviado exitosamente!');

@@ -101,9 +101,10 @@ export const sendEmail = async (emailData: EmailData, useTemporaryGroup: boolean
   try {
     console.log(`📧 Enviando email individual a: ${emailData.to}`)
     
-    let targetGroupId = defaultGroupId
-
-    // If using temporary group (for tests), create one
+    // For single emails, use sendBulkEmails with a temporary group if needed
+    // This reuses the working code path
+    let originalGroupId = process.env.MAILERLITE_GROUP_ID
+    
     if (useTemporaryGroup) {
       console.log(`🧪 Creando grupo temporal para email de prueba...`)
       const tempGroupName = `Test-${Date.now()}`
@@ -130,148 +131,29 @@ export const sendEmail = async (emailData: EmailData, useTemporaryGroup: boolean
 
       const groupData = await createGroupResponse.json()
       tempGroupId = groupData.data?.id || groupData.id
-      targetGroupId = tempGroupId
+      // Temporarily set the group ID environment variable
+      process.env.MAILERLITE_GROUP_ID = tempGroupId
       console.log(`✅ Grupo temporal creado: ${tempGroupId}`)
     }
 
-    // Ensure subscriber exists in MailerLite (add to target group)
-    await ensureSubscriber(emailData.to, apiKey, targetGroupId || undefined)
-
-    // Create campaign for this single email
-    const campaignUrl = 'https://connect.mailerlite.com/api/campaigns'
+    // Use sendBulkEmails which already works correctly
+    const results = await sendBulkEmails([emailData])
     
-    const campaignPayload: any = {
-      type: 'regular',
-      subject: emailData.subject,
-      from: {
-        email: fromEmail,
-        name: fromName
-      },
-      content: {
-        html: emailData.html,
-        plain: emailData.text || emailData.html.replace(/<[^>]*>/g, '')
-      },
-      settings: {
-        track_opens: true,
-        track_clicks: true
-      }
+    // Restore original group ID
+    if (useTemporaryGroup && originalGroupId !== undefined) {
+      process.env.MAILERLITE_GROUP_ID = originalGroupId
+    } else if (useTemporaryGroup) {
+      delete process.env.MAILERLITE_GROUP_ID
     }
 
-    if (targetGroupId) {
-      campaignPayload.groups = [targetGroupId]
+    const result = results[0] || {
+      success: false,
+      error: 'Error enviando email',
+      email: emailData.to
     }
 
-    console.log(`📧 Creando campaña para email individual...`)
-    const campaignResponse = await fetch(campaignUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(campaignPayload)
-    })
-
-    if (!campaignResponse.ok) {
-      const errorText = await campaignResponse.text()
-      console.error(`❌ Error creando campaña:`, errorText)
-      
-      // Clean up temp group if it was created
-      if (tempGroupId) {
-        try {
-          await fetch(`https://connect.mailerlite.com/api/groups/${tempGroupId}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Accept': 'application/json'
-            }
-          })
-        } catch {}
-      }
-      
-      return {
-        success: false,
-        error: 'Error creando campaña',
-        email: emailData.to
-      }
-    }
-
-    const campaignResult = await campaignResponse.json()
-    const campaignId = campaignResult.data?.id || campaignResult.id
-
-    if (!campaignId) {
-      console.error(`❌ No se obtuvo ID de campaña`)
-      
-      // Clean up temp group if it was created
-      if (tempGroupId) {
-        try {
-          await fetch(`https://connect.mailerlite.com/api/groups/${tempGroupId}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Accept': 'application/json'
-            }
-          })
-        } catch {}
-      }
-      
-      return {
-        success: false,
-        error: 'No se pudo crear la campaña',
-        email: emailData.to
-      }
-    }
-
-    console.log(`✅ Campaña creada: ${campaignId}`)
-
-    // Send the campaign
-    const sendUrl = `https://connect.mailerlite.com/api/campaigns/${campaignId}/actions/send`
-    const sendPayload: any = {
-      type: 'regular'
-    }
-
-    if (targetGroupId) {
-      sendPayload.groups = [targetGroupId]
-    }
-
-    const sendResponse = await fetch(sendUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(sendPayload)
-    })
-
-    if (!sendResponse.ok) {
-      const errorText = await sendResponse.text()
-      console.error(`❌ Error enviando campaña:`, errorText)
-      
-      // Clean up temp group if it was created
-      if (tempGroupId) {
-        try {
-          await fetch(`https://connect.mailerlite.com/api/groups/${tempGroupId}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Accept': 'application/json'
-            }
-          })
-        } catch {}
-      }
-      
-      return {
-        success: false,
-        error: 'Error enviando campaña',
-        email: emailData.to
-      }
-    }
-
-    console.log(`✅ Campaña enviada exitosamente`)
-
-    // Clean up temporary group after a short delay (to ensure campaign is sent)
-    if (tempGroupId) {
+    // Clean up temporary group after a delay if it was created
+    if (tempGroupId && result.success) {
       setTimeout(async () => {
         try {
           await fetch(`https://connect.mailerlite.com/api/groups/${tempGroupId}`, {
@@ -285,13 +167,10 @@ export const sendEmail = async (emailData: EmailData, useTemporaryGroup: boolean
         } catch (error) {
           console.warn(`⚠️ No se pudo eliminar grupo temporal:`, error)
         }
-      }, 5000) // Wait 5 seconds before cleanup
+      }, 10000) // Wait 10 seconds before cleanup
     }
 
-    return {
-      success: true,
-      messageId: `ml_campaign_${campaignId}`
-    }
+    return result
 
   } catch (error: any) {
     console.error(`❌ Error MailerLite para ${emailData.to}:`, error.message)
@@ -376,6 +255,7 @@ export const sendBulkEmails = async (emails: EmailData[]): Promise<MailerLiteRes
     
     const campaignPayload: any = {
       type: 'regular',
+      name: firstEmail.subject, // MailerLite requires a name field
       subject: firstEmail.subject,
       from: {
         email: fromEmail,
@@ -391,12 +271,19 @@ export const sendBulkEmails = async (emails: EmailData[]): Promise<MailerLiteRes
       }
     }
 
-    // If group ID is specified, send to that group only
-    // Otherwise, we'll need to send to all subscribers
-    // Note: Without a group, MailerLite will send to all active subscribers
-    if (groupId) {
-      campaignPayload.groups = [groupId]
+    // MailerLite: when using groups, don't include emails field
+    // When not using groups, emails field is required but has complex structure
+    // For now, we require a group ID to be configured
+    if (!groupId) {
+      console.error('❌ MAILERLITE_GROUP_ID no está configurado')
+      return emails.map(email => ({
+        success: false,
+        error: 'MailerLite group ID requerido para enviar campañas',
+        email: email.to
+      }))
     }
+    
+    campaignPayload.groups = [groupId]
 
     console.log(`📧 Creando campaña en MailerLite...`)
     const campaignResponse = await fetch(campaignUrl, {
