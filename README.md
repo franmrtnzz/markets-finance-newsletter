@@ -7,7 +7,7 @@ Una plataforma moderna y completa para newsletters financieras, construida con N
 - **🎯 Newsletter Profesional:** Sistema completo para crear y enviar newsletters financieras semanales
 - **👥 Gestión de Suscriptores:** Sistema de suscripción/desuscripción con tokens seguros
 - **🛠️ Panel de Administración:** Dashboard completo para gestionar suscriptores y newsletters
-- **📧 Envío Automatizado:** Integración con SendGrid para envío masivo de emails
+- **📧 Envío Automatizado:** Integración con MailerLite para envío masivo de emails (gratuito)
 - **🎨 Diseño Responsive:** Interfaz moderna y profesional con Tailwind CSS
 - **🔒 Seguridad:** Autenticación admin, protección CSRF, rate limiting y honeypot anti-spam
 - **📊 Estadísticas en Tiempo Real:** Dashboard con métricas actualizadas automáticamente
@@ -19,7 +19,7 @@ Una plataforma moderna y completa para newsletters financieras, construida con N
 - [x] Sistema de suscripción funcional
 - [x] Panel de administración operativo
 - [x] Dashboard con estadísticas en tiempo real
-- [x] Envío de newsletters con SendGrid
+- [x] Envío de newsletters con MailerLite
 - [x] Sistema de autenticación admin
 - [x] Interfaz responsive y profesional
 - [x] Base de datos Supabase configurada
@@ -37,7 +37,7 @@ Una plataforma moderna y completa para newsletters financieras, construida con N
 ### **Backend**
 - **Next.js API Routes**
 - **Supabase** (PostgreSQL) para base de datos
-- **SendGrid** para envío de emails
+- **MailerLite** para envío de emails (API gratuita)
 - **Autenticación** con cookies httpOnly
 
 ### **Base de Datos**
@@ -69,7 +69,7 @@ Una plataforma moderna y completa para newsletters financieras, construida con N
 
 ### **Sistema de Emails**
 - ✅ Plantillas HTML profesionales
-- ✅ Envío masivo con SendGrid
+- ✅ Envío masivo con MailerLite (gratuito hasta 12,000 emails/mes)
 - ✅ Tracking de envíos
 - ✅ Manejo de errores y reintentos
 
@@ -94,9 +94,12 @@ NEXT_PUBLIC_SUPABASE_URL=tu_url_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 
-# SendGrid
-SENDGRID_API_KEY=tu_sendgrid_key
-SENDGRID_FROM_EMAIL=noreply@tudominio.com
+# MailerLite
+MAILERLITE_API_KEY=tu_mailerlite_api_key
+MAILERLITE_FROM_EMAIL=noreply@tudominio.com
+MAILERLITE_FROM_NAME=Markets & Finance
+# Opcional: ID del grupo de MailerLite para organizar suscriptores
+# MAILERLITE_GROUP_ID=tu_group_id
 
 # Admin
 ADMIN_PASSWORD=tu_contraseña_segura
@@ -191,7 +194,7 @@ CREATE TABLE issues (
 
 ### **Configuración de Dominio**
 - **DNS:** Apuntar a Vercel
-- **SendGrid:** Autenticación de dominio
+- **MailerLite:** Verificación de dominio (recomendado para mejor entregabilidad)
 - **SSL:** Automático con Vercel
 
 ## 🎯 Casos de Uso
@@ -240,4 +243,4 @@ El sistema está **100% funcional** y listo para uso en producción:
 
 **Markets & Finance Newsletter** - Plataforma profesional para newsletters financieras
 
-*Desarrollado con Next.js 14, Supabase y SendGrid*
+*Desarrollado con Next.js 14, Supabase y MailerLite*
