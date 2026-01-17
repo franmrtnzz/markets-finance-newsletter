@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { sendBulkEmails } from '@/lib/sendgrid'
+import { sendBulkEmails } from '@/lib/mailerlite'
 import { compileNewsletterTemplate } from '@/lib/mjml'
 
 export async function GET(request: NextRequest) {
@@ -76,6 +76,18 @@ export async function GET(request: NextRequest) {
         // Count successful sends
         const successfulSends = sendResults.filter(result => result.success).length
         const failedSends = sendResults.length - successfulSends
+
+        if (successfulSends === 0) {
+          console.error(`❌ Todos los envíos fallaron para issue ${issue.id}. Detalles:`, sendResults)
+          results.push({
+            issueId: issue.id,
+            status: 'error',
+            error: 'No se pudieron enviar los emails (todas las llamadas a MailerLite fallaron)',
+            details: sendResults
+          })
+          // Skip DB updates for this issue
+          continue
+        }
 
         // Create send records
         const sendRecords = subscribers.map((subscriber, index) => ({

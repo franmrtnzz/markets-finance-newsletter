@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { sendBulkEmails } from '@/lib/sendgrid'
+import { sendBulkEmails } from '@/lib/mailerlite'
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,16 +92,29 @@ export async function POST(request: NextRequest) {
       console.log(`📧 Emails a enviar:`, emails.map(e => e.to).join(', '))
       
       const sendResults = await sendBulkEmails(emails)
-      
+
       console.log(`📧 Resultados del envío:`, sendResults)
-      
+
       const successCount = sendResults.filter(r => r.success).length
       const failCount = sendResults.filter(r => !r.success).length
-      
+
       console.log(`📧 Enviados exitosamente: ${successCount}, Fallidos: ${failCount}`)
-      
+
       if (failCount > 0) {
         console.warn(`⚠️ ${failCount} emails fallaron en el envío`)
+      }
+
+      // Si ningún email fue enviado correctamente, tratamos esto como error crítico
+      if (successCount === 0) {
+        console.error('❌ Todos los envíos fallaron. Revirtiendo creación del issue y devolviendo error.')
+        // Eliminar el issue creado previamente
+        try {
+          await supabase.from('issues').delete().eq('id', issue.id)
+        } catch (delErr) {
+          console.error('❌ Error eliminando issue tras fallo de envío:', delErr)
+        }
+
+        return NextResponse.json({ error: 'No se pudieron enviar los emails. Revisa los logs y MailerLite.', details: sendResults }, { status: 500 })
       }
       
     } catch (sendError) {
