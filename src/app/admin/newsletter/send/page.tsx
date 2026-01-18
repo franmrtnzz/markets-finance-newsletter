@@ -70,7 +70,19 @@ export default function SendNewsletter() {
           router.push('/admin')
         }, 3000)
       } else {
-        setMessage({ text: data.error || 'Error al enviar newsletter', type: 'error' })
+        // Mostrar detalles del error si existen
+        let errorMsg = data.error || 'Error al enviar newsletter'
+        if (data.details && Array.isArray(data.details)) {
+            const firstError = data.details.find((d: any) => !d.success)?.error
+            if (firstError) {
+                if (typeof firstError === 'object') {
+                    errorMsg += `: ${JSON.stringify(firstError)}`
+                } else {
+                    errorMsg += `: ${firstError}`
+                }
+            }
+        }
+        setMessage({ text: errorMsg, type: 'error' })
       }
     } catch (error) {
       setMessage({ text: 'Error de conexión. Inténtalo de nuevo.', type: 'error' })

@@ -76,20 +76,21 @@ async function cleanupGroup(groupId: string, apiKey: string) {
  * (Wraps bulk logic for consistency)
  */
 export const sendEmail = async (emailData: EmailData, useTemporaryGroup: boolean = false): Promise<MailerLiteResponse> => {
-  const results = await sendBulkEmails([emailData])
+  const results = await sendBulkEmails([emailData], useTemporaryGroup)
   return results[0] || { success: false, error: 'No response', email: emailData.to }
 }
 
 /**
  * Send bulk emails using MailerLite Campaigns API
  */
-export const sendBulkEmails = async (emails: EmailData[]): Promise<MailerLiteResponse[]> => {
+export const sendBulkEmails = async (emails: EmailData[], useTemporaryGroup: boolean = false): Promise<MailerLiteResponse[]> => {
   const apiKey = process.env.MAILERLITE_API_KEY
   const fromEmail = process.env.MAILERLITE_FROM_EMAIL
   const fromName = process.env.MAILERLITE_FROM_NAME || 'Markets & Finance'
   
   // Use configured group, or null to trigger temp group creation if needed
-  let groupId = process.env.MAILERLITE_GROUP_ID
+  // If useTemporaryGroup is true, we ignore the environment variable to force a temp group
+  let groupId = useTemporaryGroup ? null : process.env.MAILERLITE_GROUP_ID
   let tempGroupId: string | null = null
 
   if (!apiKey) {
@@ -151,28 +152,39 @@ export const sendBulkEmails = async (emails: EmailData[]): Promise<MailerLiteRes
 
     // Step 1: Ensure all subscribers exist in MailerLite and are in the group
     console.log(`📧 Añadiendo ${emails.length} suscriptores a MailerLite (grupo ${groupId})...`)
-    const subscriberPromises = emails.map(email => ensureSubscriber(email.to, apiKey!, groupId))
-    await Promise.allSettled(subscriberPromises)
+    
+    // Process in batches to avoid Rate Limiting (429) and timeouts
+    // MailerLite limit is ~120 calls/min. We do bursts of 5.
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < emails.length; i += BATCH_SIZE) {
+        const batch = emails.slice(i, i + BATCH_SIZE);
+        await Promise.allSettled(batch.map(email => ensureSubscriber(email.to, apiKey!, groupId)));
+        // Minimal delay to be nice to API
+        if (i + BATCH_SIZE < emails.length) await new Promise(r => setTimeout(r, 500));
+    }
+
 
     // Step 2: Create a campaign
     const campaignUrl = 'https://connect.mailerlite.com/api/campaigns'
+    
+    // Structure required by MailerLite New API (connect.mailerlite.com)
+    // "emails" must be an array of 1 object containing specific fields.
     const campaignPayload: any = {
       type: 'regular',
       name: firstEmail.subject || `Newsletter ${Date.now()}`,
-      subject: firstEmail.subject,
-      from: {
-        email: fromEmail,
-        name: fromName
-      },
-      content: {
-        html: firstEmail.html,
-        plain: firstEmail.text || firstEmail.html.replace(/<[^>]*>/g, '') 
-      },
+      emails: [
+        {
+          subject: firstEmail.subject,
+          from: fromEmail,
+          from_name: fromName,
+          content: firstEmail.html
+        }
+      ],
       groups: [groupId]
     }
 
     console.log(`📧 Creando campaña en MailerLite...`)
-    const campaignResponse = await fetch(campaignUrl, {
+    let campaignResponse = await fetch(campaignUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -182,16 +194,86 @@ export const sendBulkEmails = async (emails: EmailData[]): Promise<MailerLiteRes
       body: JSON.stringify(campaignPayload)
     })
 
+    // Retry logic for Free Plan limitation (skip content if rejected)
     if (!campaignResponse.ok) {
-      const errorText = await campaignResponse.text()
-      let errorData: any = {}
-      try { errorData = JSON.parse(errorText) } catch { errorData = { message: errorText } }
+      const errorTextRaw = await campaignResponse.text() // read once
+      let isFreePlanError = false
+      if (errorTextRaw.includes('Content submission is only available on advanced plan')) {
+         isFreePlanError = true
+      }
+
+      if (isFreePlanError) {
+         console.warn('⚠️ Detectado plan gratuito MailerLite. Reintentando creación como BORRADOR (sin contenido HTML)...')
+         // Remove content to allow draft creation
+         const draftPayload = { ...campaignPayload }
+         if (draftPayload.emails && draftPayload.emails[0]) {
+            delete draftPayload.emails[0].content
+         }
+         
+         campaignResponse = await fetch(campaignUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`,
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(draftPayload)
+         })
+         
+         if (campaignResponse.ok) {
+            console.log('✅ Campaña (Borrador) creada exitosamente. El contenido debe insertarse manualmente en MailerLite.')
+            // We cannot trigger "send" on an empty campaign, so we stop here
+            const draftResult = await campaignResponse.json()
+            const draftId = draftResult.data?.id || draftResult.id
+            
+            // Clean temp group if used, but maybe user wants it? 
+            // Actually if we clean it, they lose the recipient for the test.
+            // But for a real newsletter, the group exists.
+            if (tempGroupId) await cleanupGroup(tempGroupId, apiKey)
+
+            return emails.map(email => ({ 
+                success: true, 
+                messageId: `ml_draft_${draftId}`, 
+                email: email.to,
+                warning: 'Creado como borrador por límites del plan gratuito. Inserta el HTML en MailerLite.' 
+            }))
+         }
+      } 
       
-      console.error(`❌ Error creando campaña en MailerLite:`, errorData)
-      
-      if (tempGroupId) await cleanupGroup(tempGroupId, apiKey)
-      
-      return emails.map(email => ({ success: false, error: errorData.message || `HTTP ${campaignResponse.status}`, email: email.to }))
+      // If still not ok (or wasn't the specific error)
+      if (!campaignResponse.ok) {
+        let finalErrorText = errorTextRaw
+        
+        // If we retried, we need to read the NEW error from the second response
+        if (isFreePlanError) {
+             try {
+                finalErrorText = await campaignResponse.text()
+             } catch (e) {
+                finalErrorText = "Error reading response body from retry attempt"
+             }
+        }
+
+        let errorData: any = {}
+        try { 
+            errorData = JSON.parse(finalErrorText) 
+        } catch { 
+            errorData = { message: finalErrorText } 
+        }
+
+        console.error(`❌ Error creando campaña en MailerLite (Status ${campaignResponse.status}):`, errorData)
+        
+        // Log detailed errors if available
+        if (errorData.errors) {
+            console.error('Validation errors:', JSON.stringify(errorData.errors, null, 2))
+        }
+
+        if (tempGroupId) await cleanupGroup(tempGroupId, apiKey)
+        return emails.map(email => ({ 
+            success: false, 
+            error: errorData.message || JSON.stringify(errorData) || `HTTP ${campaignResponse.status}`,
+            email: email.to 
+        }))
+      }
     }
 
     const campaignResult = await campaignResponse.json()
