@@ -15,6 +15,7 @@ export default function AdminSubscribers() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   useEffect(() => {
     fetchSubscribers()
@@ -85,6 +86,38 @@ export default function AdminSubscribers() {
     window.URL.revokeObjectURL(url)
   }
 
+  const copyAllEmails = async () => {
+    const activeSubscribers = subscribers.filter(s => s.is_active)
+    if (activeSubscribers.length === 0) {
+      setCopyStatus('error')
+      setTimeout(() => setCopyStatus('idle'), 2000)
+      return
+    }
+
+    // Copiar todos los emails separados por coma para Gmail
+    const emailsText = activeSubscribers.map(s => s.email).join(', ')
+    
+    try {
+      await navigator.clipboard.writeText(emailsText)
+      setCopyStatus('success')
+      setTimeout(() => setCopyStatus('idle'), 2000)
+    } catch (err) {
+      // Fallback para navegadores que no soportan clipboard API
+      const textArea = document.createElement('textarea')
+      textArea.value = emailsText
+      document.body.appendChild(textArea)
+      textArea.select()
+      try {
+        document.execCommand('copy')
+        setCopyStatus('success')
+      } catch (e) {
+        setCopyStatus('error')
+      }
+      document.body.removeChild(textArea)
+      setTimeout(() => setCopyStatus('idle'), 2000)
+    }
+  }
+
   const filteredSubscribers = subscribers.filter(subscriber => {
     const matchesFilter = filter === 'all' || 
       (filter === 'active' && subscriber.is_active) ||
@@ -118,6 +151,39 @@ export default function AdminSubscribers() {
               </p>
             </div>
             <div className="flex space-x-4">
+              <button
+                onClick={copyAllEmails}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                  copyStatus === 'success'
+                    ? 'bg-green-600 text-white'
+                    : copyStatus === 'error'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {copyStatus === 'success' ? (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    ¡Copiados!
+                  </>
+                ) : copyStatus === 'error' ? (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Error
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copiar todos los emails ({subscribers.filter(s => s.is_active).length})
+                  </>
+                )}
+              </button>
               <button
                 onClick={exportToCSV}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
