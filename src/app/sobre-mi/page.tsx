@@ -26,9 +26,17 @@ async function getAbout(): Promise<AboutData> {
     .single()
 
   const defaults: AboutData = {
-    greeting: 'Hola, soy Fran 👋',
+    greeting: 'Hola 👋',
     photo: '/images/fran.jpg',
-    bio: '',
+    bio: `Tengo 21 años y actualmente curso el último año del Grado en Economía en la Universidad de Murcia. Mis principales áreas de interés son la macroeconomía, la econometría y los mercados financieros, aunque disfruto explorando cualquier ámbito relacionado con la economía y sus distintas ramas.
+
+De forma complementaria a mis estudios, desempeño actualmente un rol como auxiliar administrativo en Inversus Group, una compañía con sede en Murcia, mi ciudad.
+
+Además, encuentro en la lectura y el estudio extracurricular una forma de profundizar en aquellas áreas que más me interesan. Parte de ese aprendizaje lo condenso posteriormente en artículos y publicaciones que comparto en mis redes para quienes también sienten curiosidad por estos temas.
+
+Este proyecto nace como una extensión de mi pasión por la economía y los mercados financieros, y como una forma de centralizar todo el contenido que hasta ahora he ido compartiendo por distintas vías.
+
+Espero que lo disfrutes y encuentres interesante. Gracias por leerme 👋`,
     facts: [],
   }
 
