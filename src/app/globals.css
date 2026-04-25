@@ -3,21 +3,109 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --font-inter: 'Inter', system-ui, sans-serif;
+  }
+
   html {
-    font-family: system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+  }
+
+  ::selection {
+    @apply bg-accent/15 text-ink;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight text-ink;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink text-white px-6 py-3 text-sm font-medium
+           transition-all duration-200 hover:bg-ink-soft active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-ink;
   }
-  
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors;
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent text-white px-6 py-3 text-sm font-medium
+           transition-all duration-200 hover:bg-accent-hover active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  
-  .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-canvas-alt text-ink px-6 py-3 text-sm font-medium
+           transition-all duration-200 hover:bg-line-soft active:scale-[0.98] border border-line-soft;
   }
-} 
+
+  .input-apple {
+    @apply w-full rounded-2xl border border-line bg-white px-4 py-3 text-[15px] text-ink
+           placeholder:text-ink-mute
+           focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/10
+           transition-all duration-150;
+  }
+
+  .card {
+    @apply rounded-apple bg-canvas-card border border-line-soft transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply hover:shadow-apple hover:border-line hover:-translate-y-0.5;
+  }
+
+  .container-apple {
+    @apply max-w-6xl mx-auto px-6 sm:px-8;
+  }
+
+  .container-narrow {
+    @apply max-w-3xl mx-auto px-6 sm:px-8;
+  }
+
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.12em] text-ink-mute;
+  }
+}
+
+/* Estilos del HTML de newsletter pegado por el admin.
+   Mantenemos los estilos inline del HTML pero damos defaults razonables
+   por si llega contenido sin formato. */
+.newsletter-html {
+  @apply text-[16px] leading-relaxed text-ink;
+  max-width: 100%;
+}
+.newsletter-html img { max-width: 100%; height: auto; border-radius: 12px; }
+.newsletter-html h1 { @apply text-display mt-10 mb-4; }
+.newsletter-html h2 { @apply text-title mt-10 mb-3; }
+.newsletter-html h3 { @apply text-[20px] font-semibold mt-8 mb-2 tracking-tight; }
+.newsletter-html p { @apply my-4; }
+.newsletter-html a { @apply text-accent hover:underline; }
+.newsletter-html ul, .newsletter-html ol { @apply my-4 pl-6; }
+.newsletter-html ul { list-style: disc; }
+.newsletter-html ol { list-style: decimal; }
+.newsletter-html li { @apply my-1; }
+.newsletter-html blockquote {
+  @apply border-l-2 border-line pl-4 my-6 text-ink-soft italic;
+}
+.newsletter-html code {
+  @apply bg-canvas-alt px-1.5 py-0.5 rounded text-[13px];
+}
+.newsletter-html pre {
+  @apply bg-canvas-alt p-4 rounded-xl overflow-x-auto my-6 text-[13px];
+}
+.newsletter-html hr {
+  @apply my-10 border-line-soft;
+}
+.newsletter-html table {
+  @apply w-full border-collapse my-6;
+}
+.newsletter-html th, .newsletter-html td {
+  @apply border border-line-soft px-3 py-2 text-left;
+}
