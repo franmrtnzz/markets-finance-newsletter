@@ -19,12 +19,12 @@ export default function Home() {
         <div className="container-narrow pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
           <p className="eyebrow animate-fade-in">Newsletter · Artículos · Notas</p>
           <h1 className="mt-5 text-hero text-ink animate-fade-up">
-            Mercados y finanzas,
+            Mercados, finanzas
             <br />
-            <span className="text-ink-mute">sin ruido.</span>
+            <span className="text-ink-mute">y economía.</span>
           </h1>
           <p className="mt-6 max-w-xl mx-auto text-[17px] sm:text-[19px] leading-relaxed text-ink-soft animate-fade-up [animation-delay:80ms]">
-            Una newsletter informal que envío cuando me apetece. Más artículos, lecturas
+            Una newsletter informal que envío cuando me apetece y tengo tiempo + artículos, lecturas
             y notas sobre lo que voy aprendiendo en economía y mercados.
           </p>
 

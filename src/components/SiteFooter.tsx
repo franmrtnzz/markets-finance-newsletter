@@ -14,7 +14,7 @@ export default function SiteFooter() {
           <div>
             <p className="text-ink font-medium">Markets &amp; Finance</p>
             <p className="mt-1 max-w-md">
-              Newsletter informal sobre mercados, finanzas y economía. Sin ruido. Cuando me apetece.
+              Newsletter informal sobre mercados, finanzas y economía.
             </p>
           </div>
           <div className="flex flex-wrap gap-x-8 gap-y-2">
