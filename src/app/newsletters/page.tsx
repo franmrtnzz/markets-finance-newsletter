@@ -7,7 +7,7 @@ export const metadata = {
 }
 
 // Revalidar cada hora; las publicaciones nuevas aparecen rápido sin coste.
-export const revalidate = 3600
+export const revalidate = 60
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('es-ES', {

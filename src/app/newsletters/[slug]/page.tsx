@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { getNewsletterBySlug } from '@/lib/content'
 import Engagement from '@/components/Engagement'
 
-export const revalidate = 3600
+export const revalidate = 60
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const n = await getNewsletterBySlug(params.slug)

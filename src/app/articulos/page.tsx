@@ -6,7 +6,7 @@ export const metadata = {
   description: 'Artículos y análisis en PDF.',
 }
 
-export const revalidate = 3600
+export const revalidate = 60
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })

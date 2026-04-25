@@ -6,7 +6,7 @@ export const metadata = {
   description: 'Pensamientos breves y publicaciones cortas.',
 }
 
-export const revalidate = 3600
+export const revalidate = 60
 
 export default async function NotesPage() {
   const items = await listPublishedNotes()
