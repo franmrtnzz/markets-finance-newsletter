@@ -9,6 +9,7 @@ const links = [
   { href: '/newsletters', label: 'Newsletters' },
   { href: '/articulos', label: 'Artículos' },
   { href: '/notas', label: 'Notas' },
+  { href: '/sobre-mi', label: 'Sobre mí' },
 ]
 
 export default function SiteNav() {
