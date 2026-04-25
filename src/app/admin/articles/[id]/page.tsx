@@ -15,12 +15,15 @@ export default function ArticleEditor() {
   const [description, setDescription] = useState('')
   const [pdfUrl, setPdfUrl] = useState('')
   const [pdfPath, setPdfPath] = useState('')
+  const [coverUrl, setCoverUrl] = useState('')
   const [tags, setTags] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const coverRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (editId) {
@@ -33,6 +36,7 @@ export default function ArticleEditor() {
           setDescription(d.description || '')
           setPdfUrl(d.pdf_url || '')
           setPdfPath(d.pdf_path || '')
+          setCoverUrl(d.cover_url || '')
           setTags((d.tags || []).join(', '))
         })
     }
@@ -46,6 +50,7 @@ export default function ArticleEditor() {
     setError('')
     const fd = new FormData()
     fd.append('file', file)
+    fd.append('kind', 'pdf')
     try {
       const res = await fetch('/api/admin/articles/upload', { method: 'POST', body: fd })
       if (!res.ok) { setError('Error subiendo PDF'); return }
@@ -56,6 +61,24 @@ export default function ArticleEditor() {
       setError('Error de conexión')
     } finally {
       setUploading(false)
+    }
+  }
+
+  const uploadCover = async (file: File) => {
+    setUploadingCover(true)
+    setError('')
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('kind', 'cover')
+    try {
+      const res = await fetch('/api/admin/articles/upload', { method: 'POST', body: fd })
+      if (!res.ok) { setError('Error subiendo imagen'); return }
+      const d = await res.json()
+      setCoverUrl(d.cover_url)
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setUploadingCover(false)
     }
   }
 
@@ -71,6 +94,7 @@ export default function ArticleEditor() {
       description: description.trim() || null,
       pdf_url: pdfUrl || null,
       pdf_path: pdfPath || null,
+      cover_url: coverUrl || null,
       tags: tags.split(',').map(t => t.trim()).filter(Boolean),
       status,
     }
@@ -126,6 +150,41 @@ export default function ArticleEditor() {
         <div>
           <label className="block text-[13px] font-medium text-ink-mute mb-1.5">Descripción / texto que acompaña al PDF</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)} className="input-apple" rows={6} placeholder="Texto complementario…" style={{ resize: 'vertical' }} />
+        </div>
+
+        {/* Cover Image */}
+        <div>
+          <label className="block text-[13px] font-medium text-ink-mute mb-1.5">Imagen de portada (vista previa)</label>
+          {coverUrl ? (
+            <div className="card p-3 flex items-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={coverUrl} alt="Portada" className="w-32 h-20 object-cover rounded-xl" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] text-ink-soft truncate">{coverUrl.split('/').pop()}</p>
+              </div>
+              <button onClick={() => setCoverUrl('')} className="text-[12px] text-red-500 hover:underline shrink-0">
+                Quitar
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => coverRef.current?.click()}
+              className="card border-dashed border-2 border-line p-8 text-center cursor-pointer hover:border-accent/50 transition-colors"
+            >
+              <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) uploadCover(e.target.files[0]) }} />
+              {uploadingCover ? (
+                <div className="flex items-center justify-center gap-2 text-[14px] text-ink-mute">
+                  <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                  Subiendo…
+                </div>
+              ) : (
+                <>
+                  <p className="text-[14px] text-ink-soft">Haz clic para subir una imagen</p>
+                  <p className="text-[12px] text-ink-mute mt-1">JPG, PNG o WebP · se mostrará en la lista de artículos</p>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* PDF Upload */}

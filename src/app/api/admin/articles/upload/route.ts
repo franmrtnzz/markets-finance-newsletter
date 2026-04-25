@@ -7,21 +7,23 @@ function checkAdmin(request: NextRequest) {
   return null
 }
 
-// Subir PDF a Supabase Storage
+// Sube PDF o imagen de portada al bucket "articles"
 export async function POST(request: NextRequest) {
   const denied = checkAdmin(request)
   if (denied) return denied
 
   const formData = await request.formData()
   const file = formData.get('file') as File | null
+  const kind = (formData.get('kind') as string) || 'pdf' // 'pdf' | 'cover'
 
   if (!file) {
     return NextResponse.json({ error: 'Archivo requerido' }, { status: 400 })
   }
 
   const supabase = createServerClient()
-  const ext = file.name.split('.').pop() || 'pdf'
-  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  const ext = file.name.split('.').pop() || (kind === 'cover' ? 'jpg' : 'pdf')
+  const folder = kind === 'cover' ? 'covers' : 'pdfs'
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
   const { error } = await supabase.storage
     .from('articles')
@@ -33,8 +35,8 @@ export async function POST(request: NextRequest) {
 
   const { data: urlData } = supabase.storage.from('articles').getPublicUrl(path)
 
-  return NextResponse.json({
-    pdf_url: urlData.publicUrl,
-    pdf_path: path,
-  })
+  if (kind === 'cover') {
+    return NextResponse.json({ cover_url: urlData.publicUrl, cover_path: path })
+  }
+  return NextResponse.json({ pdf_url: urlData.publicUrl, pdf_path: path })
 }
