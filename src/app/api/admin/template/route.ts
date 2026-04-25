@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@/lib/supabase'
 
 function isAuthed() {
-  return cookies().get('admin_session')?.value === 'true'
+  return !!cookies().get('admin_session')?.value
 }
 
 // GET — devuelve el HTML guardado (lo almacenamos en una tabla settings key-value)
