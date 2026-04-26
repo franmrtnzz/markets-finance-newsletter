@@ -189,7 +189,7 @@ export default function ArticleEditor() {
 
         {/* PDF Upload */}
         <div>
-          <label className="block text-[13px] font-medium text-ink-mute mb-1.5">PDF</label>
+          <label className="block text-[13px] font-medium text-ink-mute mb-1.5">PDF o imagen (contenido principal)</label>
           {pdfUrl ? (
             <div className="card p-4 flex items-center justify-between">
               <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-[14px] text-accent hover:underline truncate">
@@ -204,7 +204,7 @@ export default function ArticleEditor() {
               onClick={() => fileRef.current?.click()}
               className="card border-dashed border-2 border-line p-10 text-center cursor-pointer hover:border-accent/50 transition-colors"
             >
-              <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={e => { if (e.target.files?.[0]) uploadPDF(e.target.files[0]) }} />
+              <input ref={fileRef} type="file" accept=".pdf,image/*" className="hidden" onChange={e => { if (e.target.files?.[0]) uploadPDF(e.target.files[0]) }} />
               {uploading ? (
                 <div className="flex items-center justify-center gap-2 text-[14px] text-ink-mute">
                   <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -212,8 +212,8 @@ export default function ArticleEditor() {
                 </div>
               ) : (
                 <>
-                  <p className="text-[14px] text-ink-soft">Haz clic para subir un PDF</p>
-                  <p className="text-[12px] text-ink-mute mt-1">o arrastra aquí</p>
+                  <p className="text-[14px] text-ink-soft">Haz clic para subir un PDF o imagen</p>
+                  <p className="text-[12px] text-ink-mute mt-1">PDF, PNG, JPG o WebP</p>
                 </>
               )}
             </div>

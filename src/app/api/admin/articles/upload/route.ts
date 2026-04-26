@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServerClient()
   const ext = file.name.split('.').pop() || (kind === 'cover' ? 'jpg' : 'pdf')
-  const folder = kind === 'cover' ? 'covers' : 'pdfs'
+  const isImage = file.type.startsWith('image/')
+  const folder = kind === 'cover' ? 'covers' : isImage ? 'images' : 'pdfs'
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
   const { error } = await supabase.storage

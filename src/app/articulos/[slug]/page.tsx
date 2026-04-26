@@ -54,27 +54,39 @@ export default async function ArticleDetailPage({ params }: { params: { slug: st
         </div>
       )}
 
-      {a.pdf_url && (
-        <div className="mt-10">
-          <div className="card overflow-hidden">
-            <iframe
-              src={a.pdf_url}
-              className="w-full h-[80vh] bg-canvas-alt"
-              title={a.title}
+      {a.pdf_url && (() => {
+        const isImage = /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(a.pdf_url!)
+        return isImage ? (
+          <div className="mt-10 text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={a.pdf_url!}
+              alt={a.title}
+              className="w-full rounded-2xl shadow-apple"
             />
+            <div className="mt-4">
+              <a href={a.pdf_url!} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+                Abrir imagen en otra pestaña
+              </a>
+            </div>
           </div>
-          <div className="mt-4 text-center">
-            <a
-              href={a.pdf_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-ghost"
-            >
-              Abrir PDF en otra pestaña
-            </a>
+        ) : (
+          <div className="mt-10">
+            <div className="card overflow-hidden">
+              <iframe
+                src={a.pdf_url!}
+                className="w-full h-[80vh] bg-canvas-alt"
+                title={a.title}
+              />
+            </div>
+            <div className="mt-4 text-center">
+              <a href={a.pdf_url!} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+                Abrir PDF en otra pestaña
+              </a>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       <Engagement contentType="article" contentId={a.id} />
     </article>
