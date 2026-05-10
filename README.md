@@ -1,91 +1,86 @@
-# Markets & Finance
+# Markets & Finance Newsletter
 
-Web personal para una newsletter informal sobre mercados, finanzas y economía. Incluye:
+A publishing platform for a markets and finance newsletter. The project combines a public archive for newsletters, articles, and notes with a private admin area for content and subscriber management.
 
-- 📬 **Captación de suscriptores** (con doble opt-in básico)
-- 🗂️ **Archivo público** de newsletters, artículos (PDF) y notas cortas
-- ❤️ **Likes anónimos** y 💬 **comentarios con login Google** en los contenidos
-- 🔒 **Panel admin privado** para gestionar suscriptores y publicar contenido
-- 📋 **Envío manual**: el panel te permite copiar todos los emails activos al portapapeles para enviar la newsletter desde tu cliente de correo (sin proveedor externo, sin coste).
+The application is intentionally small: it avoids a commercial email platform, keeps the content model explicit, and uses Supabase for persistence, authentication primitives, storage, and row-level security.
 
-## Stack
+## Features
 
-- **Next.js 14** (App Router) + **TypeScript** + **Tailwind CSS**
-- **Supabase** (Postgres + Auth + Storage + RLS)
-- **Vercel** (hosting)
+- Public pages for newsletters, PDF/image-based articles, short notes, and author information.
+- Email subscription, reactivation, unsubscribe, and subscriber administration workflows.
+- Admin views for drafting and publishing newsletters, articles, notes, template content, and site copy.
+- Supabase-backed content tables with draft/published status and publication timestamps.
+- Anonymous likes and authenticated comments for published content.
+- Article file uploads through Supabase Storage.
 
-Coste objetivo: **0 €/mes**.
+## Architecture
 
-## Estado
+The project uses the Next.js App Router as both the public web application and the backend layer.
 
-🚧 En reconstrucción. Ver el roadmap por fases más abajo.
+- `src/app`: public routes, admin routes, and API route handlers.
+- `src/components`: shared presentation components for navigation, layout, comments, and engagement.
+- `src/lib`: Supabase clients, content fetchers, MJML support, and shared types.
+- `supabase/migrations`: database schema for content, engagement, comments, and settings.
 
-### Fase 1 — Limpieza y rediseño visual ✅ en curso
-- [x] Borrado de docs e infraestructura obsoleta (SendGrid, MailerLite, crons fantasma…)
-- [x] Sistema de diseño Apple-style (tipografía, paleta, componentes base)
-- [x] Home pública nueva
-- [x] Navegación + footer compartidos
-- [x] Páginas stub: `/newsletters`, `/articulos`, `/notas`
+Public pages read published records from Supabase. Admin routes use a server-side Supabase client with the service role key and are protected by an admin session cookie. Supabase RLS is enabled for content and engagement tables, with public read access limited to published or visible records.
 
-### Fase 2 — Modelo de datos y publicaciones
-- [ ] Tablas `newsletters`, `articles`, `notes`, `likes`, `comments`
-- [ ] Storage de Supabase para PDFs e imágenes
-- [ ] Páginas individuales: `/newsletters/[slug]`, `/articulos/[slug]`, `/notas/[slug]`
+## Technology
 
-### Fase 3 — Panel admin
-- [ ] Rediseño del panel
-- [ ] Botón "Copiar emails activos al portapapeles" + exportar CSV
-- [ ] Editor de newsletters (pegar HTML + preview en iframe)
-- [ ] Editor de artículos (subir PDF + descripción)
-- [ ] Editor de notas (texto corto)
-- [ ] Moderación de comentarios
+- Next.js 14 with the App Router
+- TypeScript and React 18
+- Tailwind CSS
+- Supabase Postgres, Auth, Storage, and RLS
+- Vercel deployment
+- pnpm for package management
 
-### Fase 4 — Interacción pública
-- [ ] Likes anónimos (cookie/fingerprint, sin login)
-- [ ] Comentarios con Google OAuth (Supabase Auth)
-
-## Variables de entorno
-
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# Admin
-ADMIN_PASSWORD=
-
-# App
-BASE_URL=https://marketsfinancenewsletter.com
-```
-
-## Desarrollo local
+## Local Setup
 
 ```bash
 pnpm install
-cp env.example .env.local   # rellenar con tus claves
+cp env.example .env.local
 pnpm dev
 ```
 
-## Estructura
+Open `http://localhost:3000`.
 
+Required environment variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+ADMIN_PASSWORD=
+BASE_URL=http://localhost:3000
 ```
-src/
-  app/
-    page.tsx                 Home (suscripción + destacados)
-    newsletters/             Archivo público de newsletters
-    articulos/               Archivo público de artículos
-    notas/                   Notas cortas
-    admin/                   Panel privado (login + gestión)
-    api/
-      subscribe/             Alta
-      confirm/               Confirmación doble opt-in
-      unsubscribe/           Baja
-      admin/                 Endpoints protegidos del panel
-  components/
-    SiteNav.tsx              Nav pública
-    SiteFooter.tsx           Footer público
-  lib/
-    supabase.ts              Clientes de Supabase
-    mjml.ts                  Render MJML (legacy, en revisión)
+
+For production, set the same variables in Vercel and point `BASE_URL` to the deployed site.
+
+## Database
+
+The Supabase schema is stored in `supabase/migrations`.
+
+```bash
+supabase db push
 ```
+
+The migrations create content tables for newsletters, articles, and notes, plus engagement tables for likes and comments. Articles use the `articles` storage bucket for PDFs, images, and cover assets.
+
+## Useful Commands
+
+```bash
+pnpm dev      # run the development server
+pnpm build    # create a production build
+pnpm start    # run the production build locally
+pnpm lint     # run the Next.js lint task
+```
+
+## Technical Notes
+
+- The admin area uses simple cookie-based access because the project is operated by a single maintainer.
+- Newsletter delivery is intentionally manual: the admin area manages the subscriber list, while sending can remain outside the application.
+- Draft/published state is stored in the database instead of being inferred from routes or file names.
+- Runtime secrets, subscriber data, and local build artifacts are excluded from version control.
+
+## License
+
+Private project. All rights reserved.

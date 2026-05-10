@@ -1,7 +1,7 @@
 {
   "name": "markets-finance-newsletter",
   "version": "1.0.0",
-  "description": "A modern, production-ready newsletter platform built with Next.js 14",
+  "description": "Publishing platform for a markets and finance newsletter built with Next.js and Supabase",
   "private": true,
   "scripts": {
     "dev": "next dev",
