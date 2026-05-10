@@ -26,7 +26,7 @@ async function getAbout(): Promise<AboutData> {
     .single()
 
   const defaults: AboutData = {
-    greeting: 'Hola 👋',
+    greeting: '',
     photo: '/images/fran.jpg',
     bio: `Mi nombre es Fran, tengo 21 años y actualmente curso el último año del Grado en Economía en la Universidad de Murcia. Mis principales áreas de interés son la macroeconomía, el análisis de datos y los mercados financieros, aunque disfruto explorando cualquier ámbito relacionado con la economía y sus distintas ramas.
 
@@ -36,7 +36,7 @@ Además, encuentro en la lectura y el estudio extracurricular una forma de profu
 
 Este proyecto nace como una extensión de mi pasión por la economía y los mercados financieros, y como una forma de centralizar todo el contenido que hasta ahora he ido compartiendo por distintas vías.
 
-Espero que lo disfrutes y encuentres interesante. Gracias por leerme 👋`,
+Espero que lo disfrutes y encuentres interesante. Gracias por leerme`,
     facts: [],
   }
 
@@ -50,16 +50,11 @@ export default async function SobreMiPage() {
   const about = await getAbout()
   const paragraphs = about.bio
     .split(/\n\s*\n/)
-    .map(p => p.trim())
+    .map(p => p.replace(/\s*👋/g, '').trim())
     .filter(Boolean)
 
   return (
     <div className="container-narrow pt-24 pb-32">
-      <header className="text-center mb-16 animate-fade-in">
-        <p className="eyebrow">Sobre mí</p>
-        <h1 className="mt-4 text-display">{about.greeting}</h1>
-      </header>
-
       <div className="max-w-2xl mx-auto space-y-12 animate-fade-up">
         {/* Foto */}
         {about.photo && (

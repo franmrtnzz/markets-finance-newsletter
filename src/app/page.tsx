@@ -25,7 +25,7 @@ export default function Home() {
           </h1>
           <p className="mt-6 max-w-xl mx-auto text-[17px] sm:text-[19px] leading-relaxed text-ink-soft animate-fade-up [animation-delay:80ms]">
             Una newsletter informal que envío cuando me apetece y tengo tiempo + artículos, lecturas
-            y notas sobre lo que voy aprendiendo en economía y mercados.
+            y notas sobre lo que voy aprendiendo.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-3 animate-fade-up [animation-delay:140ms]">
