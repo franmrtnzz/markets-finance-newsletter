@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { normalizeSlug } from '@/lib/slugs'
 
 export default function NewsletterEditor() {
   const router = useRouter()
@@ -30,20 +31,12 @@ export default function NewsletterEditor() {
     }
   }, [editId])
 
-  const autoSlug = (t: string) => {
-    return t
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-  }
-
   const save = async (status: 'draft' | 'published') => {
     if (!title.trim() || !html.trim()) {
       setError('Título y HTML son requeridos')
       return
     }
-    const finalSlug = slug.trim() || autoSlug(title)
+    const finalSlug = normalizeSlug(slug || title)
     setSaving(true)
     setError('')
     setSuccess('')
@@ -96,7 +89,7 @@ export default function NewsletterEditor() {
           <label className="block text-[13px] font-medium text-ink-mute mb-1.5">Título</label>
           <input
             value={title}
-            onChange={e => { setTitle(e.target.value); if (isNew && !slug) setSlug(autoSlug(e.target.value)) }}
+            onChange={e => { setTitle(e.target.value); if (isNew && !slug) setSlug(normalizeSlug(e.target.value)) }}
             placeholder="Edición #1 — Semana del 21 de abril"
             className="input-apple"
           />
@@ -105,7 +98,7 @@ export default function NewsletterEditor() {
           <label className="block text-[13px] font-medium text-ink-mute mb-1.5">Slug (URL)</label>
           <input
             value={slug}
-            onChange={e => setSlug(e.target.value)}
+            onChange={e => setSlug(normalizeSlug(e.target.value))}
             placeholder="edicion-1-semana-21-abril"
             className="input-apple"
           />

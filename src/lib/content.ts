@@ -1,4 +1,5 @@
 import { createServerClient } from './supabase'
+import { normalizeSlug, safeDecodeSlug } from './slugs'
 import type { Article, Newsletter, Note } from './types'
 
 // Fetchers públicos: leen siempre con service role en server components
@@ -21,17 +22,27 @@ export async function listPublishedNewsletters(): Promise<Newsletter[]> {
 
 export async function getNewsletterBySlug(slug: string): Promise<Newsletter | null> {
   const supabase = createServerClient()
+  const decodedSlug = safeDecodeSlug(slug)
+  const candidates = Array.from(new Set([
+    slug,
+    decodedSlug,
+    normalizeSlug(decodedSlug),
+    normalizeSlug(slug),
+  ].filter(Boolean)))
+
   const { data, error } = await supabase
     .from('newsletters')
     .select('*')
-    .eq('slug', slug)
+    .in('slug', candidates)
     .eq('status', 'published')
-    .maybeSingle()
+    .limit(candidates.length)
   if (error) {
     console.error('getNewsletterBySlug', error)
     return null
   }
-  return data
+  return candidates
+    .map(candidate => data?.find(newsletter => newsletter.slug === candidate))
+    .find(Boolean) ?? null
 }
 
 export async function listPublishedArticles(): Promise<Article[]> {

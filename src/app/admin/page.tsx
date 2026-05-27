@@ -4,23 +4,25 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ subscribers: 0, active: 0, newsletters: 0, articles: 0, notes: 0 })
+  const [stats, setStats] = useState({ subscribers: 0, active: 0, newsletters: 0, articles: 0, notes: 0, newsCandidates: 0 })
   const [recentSubs, setRecentSubs] = useState<{ email: string; subscribed_at: string }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [subRes, nlRes, artRes, noteRes] = await Promise.all([
+        const [subRes, nlRes, artRes, noteRes, newsRes] = await Promise.all([
           fetch('/api/admin/subscribers'),
           fetch('/api/admin/newsletters'),
           fetch('/api/admin/articles'),
           fetch('/api/admin/notes'),
+          fetch('/api/admin/news-candidates'),
         ])
         const subData = subRes.ok ? await subRes.json() : { subscribers: [] }
         const nlData = nlRes.ok ? await nlRes.json() : { newsletters: [] }
         const artData = artRes.ok ? await artRes.json() : { articles: [] }
         const noteData = noteRes.ok ? await noteRes.json() : { notes: [] }
+        const newsData = newsRes.ok ? await newsRes.json() : { news: [] }
 
         const subs = subData.subscribers || []
         setStats({
@@ -29,6 +31,7 @@ export default function AdminDashboard() {
           newsletters: nlData.newsletters?.length || 0,
           articles: artData.articles?.length || 0,
           notes: noteData.notes?.length || 0,
+          newsCandidates: newsData.news?.length || 0,
         })
         setRecentSubs(
           subs
@@ -60,6 +63,7 @@ export default function AdminDashboard() {
     { label: 'Newsletters', value: stats.newsletters, accent: 'text-accent', bg: 'bg-blue-50' },
     { label: 'Artículos', value: stats.articles, accent: 'text-violet-600', bg: 'bg-violet-50' },
     { label: 'Notas', value: stats.notes, accent: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Noticias newsletter', value: stats.newsCandidates, accent: 'text-teal-600', bg: 'bg-teal-50' },
   ]
 
   const quickActions = [
@@ -67,6 +71,7 @@ export default function AdminDashboard() {
     { label: 'Nuevo artículo', href: '/admin/articles/new', icon: '📄' },
     { label: 'Nueva nota', href: '/admin/notes/new', icon: '💬' },
     { label: 'Copiar emails', href: '/admin/subscribers', icon: '📋' },
+    { label: 'Nueva noticia', href: '/admin/news-candidates/new', icon: '📰' },
   ]
 
   return (
@@ -75,7 +80,7 @@ export default function AdminDashboard() {
       <p className="mt-1 text-[15px] text-ink-soft">Resumen de tu plataforma.</p>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-8">
         {cards.map(c => (
           <div key={c.label} className={`rounded-2xl p-5 ${c.bg}`}>
             <p className={`text-3xl font-semibold tracking-tight ${c.accent}`}>{c.value}</p>
@@ -86,7 +91,7 @@ export default function AdminDashboard() {
 
       {/* Quick actions */}
       <h2 className="mt-12 text-title">Acciones rápidas</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
         {quickActions.map(a => (
           <Link
             key={a.href}

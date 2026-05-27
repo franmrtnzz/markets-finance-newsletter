@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
+import { normalizeSlug } from '@/lib/slugs'
 
 function checkAdmin(request: NextRequest) {
   const session = request.cookies.get('admin_session')
@@ -28,8 +29,9 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
   const { slug, title, excerpt, html, status } = body
+  const finalSlug = normalizeSlug(slug || title || '')
 
-  if (!slug || !title || !html) {
+  if (!finalSlug || !title || !html) {
     return NextResponse.json({ error: 'slug, title y html son requeridos' }, { status: 400 })
   }
 
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('newsletters')
-    .insert({ slug, title, excerpt: excerpt || null, html, status: status || 'draft', published_at: publishedAt })
+    .insert({ slug: finalSlug, title, excerpt: excerpt || null, html, status: status || 'draft', published_at: publishedAt })
     .select()
     .single()
 

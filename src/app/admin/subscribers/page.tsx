@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Subscriber {
   id: string
@@ -12,22 +13,36 @@ interface Subscriber {
 export default function AdminSubscribers() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [search, setSearch] = useState('')
   const [copyStatus, setCopyStatus] = useState<'idle' | 'success'>('idle')
+  const router = useRouter()
 
-  useEffect(() => { fetchData() }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
+      setError('')
       const res = await fetch('/api/admin/subscribers')
-      if (res.ok) {
-        const data = await res.json()
-        setSubscribers(data.subscribers || [])
+      if (res.status === 401) {
+        router.replace('/admin/login?next=/admin/subscribers')
+        return
       }
-    } catch (e) { console.error(e) }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Error al obtener suscriptores')
+      }
+
+      const data = await res.json()
+      setSubscribers(data.subscribers || [])
+    } catch (e) {
+      console.error(e)
+      setError('No he podido cargar los suscriptores. Prueba a recargar o inicia sesión de nuevo.')
+    }
     finally { setLoading(false) }
-  }
+  }, [router])
+
+  useEffect(() => { fetchData() }, [fetchData])
 
   const updateStatus = async (id: string, isActive: boolean) => {
     await fetch(`/api/admin/subscribers/${id}/status`, {
@@ -137,6 +152,12 @@ export default function AdminSubscribers() {
         </div>
       </div>
 
+      {error && (
+        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-900">
+          {error}
+        </div>
+      )}
+
       {/* Tabla */}
       <div className="mt-6 card overflow-hidden">
         <table className="w-full text-left">
@@ -182,7 +203,7 @@ export default function AdminSubscribers() {
             ))}
           </tbody>
         </table>
-        {filtered.length === 0 && (
+        {filtered.length === 0 && !error && (
           <p className="text-center py-12 text-[14px] text-ink-mute">
             No se encontraron suscriptores.
           </p>

@@ -55,3 +55,35 @@ export interface CommentRecord {
   created_at: string
   updated_at: string
 }
+
+// ============================================================================
+// Noticias candidatas para newsletter cuatrimestral
+// ============================================================================
+
+export type NewsCategory = 'economia_general' | 'sector_financiero'
+export type NewsScope = 'espana' | 'europa' | 'eeuu' | 'global' | 'otro'
+export type NewsStatus = 'pendiente' | 'candidata' | 'descartada' | 'seleccionada'
+
+export interface NewsCandidate {
+  id: string
+  title: string
+  source: string | null
+  url: string | null
+  published_date: string | null
+  saved_at: string
+  category: NewsCategory
+  scope: NewsScope
+  quarter: string
+  tags: string[]
+  summary: string | null
+  relevance: string | null
+  editorial_idea: string | null
+  importance: string | null
+  editorial_angle: string | null
+  inversus_link: string | null
+  rating: number
+  status: NewsStatus
+  selected_for: NewsCategory | null
+  created_at: string
+  updated_at: string
+}

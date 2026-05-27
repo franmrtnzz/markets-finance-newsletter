@@ -1,6 +1,7 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getNewsletterBySlug } from '@/lib/content'
+import { safeDecodeSlug } from '@/lib/slugs'
 import Engagement from '@/components/Engagement'
 
 export const revalidate = 60
@@ -21,6 +22,7 @@ function formatDate(d: string) {
 export default async function NewsletterDetailPage({ params }: { params: { slug: string } }) {
   const n = await getNewsletterBySlug(params.slug)
   if (!n) notFound()
+  if (safeDecodeSlug(params.slug) !== n.slug) redirect(`/newsletters/${n.slug}`)
 
   return (
     <article className="container-narrow pt-20 pb-24">

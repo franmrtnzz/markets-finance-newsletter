@@ -20,7 +20,8 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password }),
       })
       if (res.ok) {
-        router.push('/admin')
+        const next = new URLSearchParams(window.location.search).get('next')
+        router.push(next?.startsWith('/admin') ? next : '/admin')
       } else {
         const data = await res.json()
         setError(data.error || 'Contraseña incorrecta')

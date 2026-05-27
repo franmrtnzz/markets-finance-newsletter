@@ -17,6 +17,29 @@ interface AboutData {
   facts: Fact[]
 }
 
+function cleanBioParagraph(value: string) {
+  const withoutGreeting = value.replace(/\s*👋/g, '').trimEnd()
+  const chars = Array.from(withoutGreeting)
+  let end = chars.length
+
+  while (end > 0 && isTrailingIconChar(chars[end - 1])) {
+    end -= 1
+  }
+
+  return chars.slice(0, end).join('').trim()
+}
+
+function isTrailingIconChar(char: string) {
+  const codePoint = char.codePointAt(0) ?? 0
+  return (
+    /\s/.test(char) ||
+    codePoint === 0xfe0f ||
+    codePoint === 0x200d ||
+    (codePoint >= 0x2600 && codePoint <= 0x27bf) ||
+    (codePoint >= 0x1f000 && codePoint <= 0x1ffff)
+  )
+}
+
 async function getAbout(): Promise<AboutData> {
   const supabase = createServerClient()
   const { data } = await supabase
@@ -50,7 +73,7 @@ export default async function SobreMiPage() {
   const about = await getAbout()
   const paragraphs = about.bio
     .split(/\n\s*\n/)
-    .map(p => p.replace(/\s*👋/g, '').trim())
+    .map(cleanBioParagraph)
     .filter(Boolean)
 
   return (
