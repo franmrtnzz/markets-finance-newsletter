@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import BrandLogo from '@/components/BrandLogo'
 
 const links = [
   { href: '/', label: 'Inicio' },
@@ -37,9 +38,7 @@ export default function SiteNav() {
     >
       <div className="container-apple flex items-center justify-between h-14">
         <Link href="/" className="flex items-center gap-2 group">
-          <span className="w-7 h-7 rounded-lg bg-ink text-white grid place-items-center text-[11px] font-semibold tracking-tight">
-            M&amp;F
-          </span>
+          <BrandLogo size={40} priority className="rounded-xl" />
           <span className="text-[15px] font-semibold tracking-tight text-ink group-hover:opacity-70 transition-opacity">
             Markets &amp; Finance
           </span>

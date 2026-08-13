@@ -18,6 +18,20 @@ export const metadata: Metadata = {
     title: 'Markets & Finance',
     description: 'Newsletter, artículos y notas sobre mercados y finanzas.',
     type: 'website',
+    images: [
+      {
+        url: '/images/markets-finance-monogram-v2.png',
+        width: 1254,
+        height: 1254,
+        alt: 'Logotipo de Markets & Finance',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Markets & Finance',
+    description: 'Newsletter, artículos y notas sobre mercados y finanzas.',
+    images: ['/images/markets-finance-monogram-v2.png'],
   },
 }
 

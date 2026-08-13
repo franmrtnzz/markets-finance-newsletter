@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import BrandLogo from '@/components/BrandLogo'
 
 export default function SiteFooter() {
   const pathname = usePathname()
@@ -11,11 +12,14 @@ export default function SiteFooter() {
     <footer className="mt-24 border-t border-line-soft bg-canvas-alt">
       <div className="container-apple py-12 text-[13px] text-ink-mute">
         <div className="flex flex-col md:flex-row justify-between gap-6">
-          <div>
-            <p className="text-ink font-medium">Markets &amp; Finance</p>
-            <p className="mt-1 max-w-md">
-              Newsletter informal sobre mercados, finanzas y economía.
-            </p>
+          <div className="flex items-start gap-3">
+            <BrandLogo size={48} className="rounded-xl" />
+            <div>
+              <p className="text-ink font-medium">Markets &amp; Finance</p>
+              <p className="mt-1 max-w-md">
+                Newsletter informal sobre mercados, finanzas y economía.
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-x-8 gap-y-2">
             <Link href="/newsletters" className="hover:text-ink transition-colors">Newsletters</Link>

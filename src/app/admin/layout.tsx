@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import BrandLogo from '@/components/BrandLogo'
 
 const navItems = [
   {
@@ -111,9 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         {/* Logo */}
         <div className="h-14 flex items-center gap-2 px-5 border-b border-line-soft shrink-0">
-          <span className="w-7 h-7 rounded-lg bg-ink text-white grid place-items-center text-[11px] font-semibold">
-            M&amp;F
-          </span>
+          <BrandLogo size={40} priority className="rounded-xl" />
           <span className="text-[15px] font-semibold tracking-tight text-ink">Admin</span>
         </div>
 

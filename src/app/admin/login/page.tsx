@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import BrandLogo from '@/components/BrandLogo'
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
@@ -37,9 +38,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-canvas flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-ink text-white grid place-items-center mx-auto text-lg font-semibold">
-            M&amp;F
-          </div>
+          <BrandLogo size={96} priority className="mx-auto rounded-2xl" />
           <h1 className="mt-6 text-display">Admin</h1>
           <p className="mt-2 text-[15px] text-ink-soft">Panel de administración</p>
         </div>
