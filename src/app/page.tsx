@@ -27,7 +27,7 @@ export default function Home() {
           <source src="/video/markets-finance-hero-v2.mp4" type="video/mp4" />
         </video>
         <div className="hero-video__overlay" aria-hidden="true" />
-        <div className="container-narrow relative z-10 pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
+        <div className="hero-video__content container-narrow relative z-10 pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
           <p className="eyebrow animate-fade-in">Newsletter · Artículos · Notas</p>
           <h1 className="mt-5 text-hero text-ink animate-fade-up">
             Mercados, finanzas

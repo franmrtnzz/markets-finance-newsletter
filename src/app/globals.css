@@ -51,9 +51,24 @@
     inset: 0;
     z-index: -10;
     background:
-      radial-gradient(60% 58% at 50% 42%, rgba(251, 251, 253, 0.86), rgba(251, 251, 253, 0.68) 62%, rgba(245, 245, 247, 0.78) 100%),
-      linear-gradient(180deg, rgba(251, 251, 253, 0.70), rgba(245, 245, 247, 0.74));
-    backdrop-filter: saturate(0.82);
+      linear-gradient(180deg, rgba(245, 245, 247, 0.22) 0%, rgba(245, 245, 247, 0.08) 42%, rgba(245, 245, 247, 0.22) 100%);
+  }
+
+  .hero-video__content::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 2.75rem -5rem 2rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(251, 251, 253, 0.92) 0%,
+      rgba(251, 251, 253, 0.82) 42%,
+      rgba(251, 251, 253, 0.42) 68%,
+      transparent 80%
+    );
+    filter: blur(10px);
+    pointer-events: none;
   }
 
   .btn-primary {
@@ -112,8 +127,18 @@
 
   .hero-video__overlay {
     background:
-      radial-gradient(78% 58% at 50% 42%, rgba(251, 251, 253, 0.90), rgba(251, 251, 253, 0.73) 68%, rgba(245, 245, 247, 0.82) 100%),
-      linear-gradient(180deg, rgba(251, 251, 253, 0.76), rgba(245, 245, 247, 0.80));
+      linear-gradient(180deg, rgba(245, 245, 247, 0.28) 0%, rgba(245, 245, 247, 0.10) 42%, rgba(245, 245, 247, 0.28) 100%);
+  }
+
+  .hero-video__content::before {
+    inset: 3.25rem -1.5rem 2.5rem;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(251, 251, 253, 0.94) 0%,
+      rgba(251, 251, 253, 0.84) 46%,
+      rgba(251, 251, 253, 0.48) 68%,
+      transparent 82%
+    );
   }
 }
 
