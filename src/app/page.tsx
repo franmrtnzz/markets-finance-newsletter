@@ -7,16 +7,27 @@ export default function Home() {
   return (
     <>
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              'radial-gradient(60% 40% at 50% 0%, rgba(0,113,227,0.06), transparent 70%), linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 100%)',
-          }}
-        />
-        <div className="container-narrow pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
+      <section className="hero-video relative isolate overflow-hidden">
+        <video
+          className="hero-video__media"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/video/markets-finance-hero-v2-poster.jpg"
+          aria-hidden="true"
+          tabIndex={-1}
+        >
+          <source
+            src="/video/markets-finance-hero-v2-mobile.mp4"
+            media="(max-width: 767px)"
+            type="video/mp4"
+          />
+          <source src="/video/markets-finance-hero-v2.mp4" type="video/mp4" />
+        </video>
+        <div className="hero-video__overlay" aria-hidden="true" />
+        <div className="container-narrow relative z-10 pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
           <p className="eyebrow animate-fade-in">Newsletter · Artículos · Notas</p>
           <h1 className="mt-5 text-hero text-ink animate-fade-up">
             Mercados, finanzas
