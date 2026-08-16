@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Markets & Finance — Newsletter, artículos y notas',
   description: 'Newsletter informal sobre mercados, finanzas y economía. Más artículos, lecturas y notas que voy publicando.',
-  metadataBase: new URL(process.env.BASE_URL ?? 'https://marketsfinancenewsletter.com'),
+  metadataBase: new URL(process.env.BASE_URL ?? 'https://markets-finance-newsletter.vercel.app'),
   openGraph: {
     title: 'Markets & Finance',
     description: 'Newsletter, artículos y notas sobre mercados y finanzas.',

@@ -53,7 +53,7 @@ ADMIN_PASSWORD=
 BASE_URL=http://localhost:3000
 ```
 
-For production, set the same variables in Vercel and point `BASE_URL` to the deployed site.
+For production, set the same variables in Vercel and point `BASE_URL` to `https://markets-finance-newsletter.vercel.app`.
 
 ## Database
 
