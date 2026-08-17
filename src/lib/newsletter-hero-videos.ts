@@ -6,19 +6,19 @@ export type NewsletterHeroVideo = {
 
 const NEWSLETTER_HERO_VIDEOS: Record<string, NewsletterHeroVideo> = {
   economiaentredosfuerzas: {
-    desktop: '/video/newsletters/economiaentredosfuerzas.mp4',
-    mobile: '/video/newsletters/economiaentredosfuerzas-mobile.mp4',
-    poster: '/video/newsletters/economiaentredosfuerzas-poster.jpg',
+    desktop: '/video/newsletters/economiaentredosfuerzas.mp4?v=2',
+    mobile: '/video/newsletters/economiaentredosfuerzas-mobile.mp4?v=2',
+    poster: '/video/newsletters/economiaentredosfuerzas-poster.jpg?v=2',
   },
   mercadomiradatiposinteres: {
-    desktop: '/video/newsletters/mercadomiradatiposinteres.mp4',
-    mobile: '/video/newsletters/mercadomiradatiposinteres-mobile.mp4',
-    poster: '/video/newsletters/mercadomiradatiposinteres-poster.jpg',
+    desktop: '/video/newsletters/mercadomiradatiposinteres.mp4?v=2',
+    mobile: '/video/newsletters/mercadomiradatiposinteres-mobile.mp4?v=2',
+    poster: '/video/newsletters/mercadomiradatiposinteres-poster.jpg?v=2',
   },
   'wall-street-oro-petroleo-nuevo-ciclo-financiero': {
-    desktop: '/video/newsletters/wall-street-oro-petroleo-nuevo-ciclo-financiero.mp4',
-    mobile: '/video/newsletters/wall-street-oro-petroleo-nuevo-ciclo-financiero-mobile.mp4',
-    poster: '/video/newsletters/wall-street-oro-petroleo-nuevo-ciclo-financiero-poster.jpg',
+    desktop: '/video/newsletters/wall-street-oro-petroleo-nuevo-ciclo-financiero.mp4?v=2',
+    mobile: '/video/newsletters/wall-street-oro-petroleo-nuevo-ciclo-financiero-mobile.mp4?v=2',
+    poster: '/video/newsletters/wall-street-oro-petroleo-nuevo-ciclo-financiero-poster.jpg?v=2',
   },
 }
 
