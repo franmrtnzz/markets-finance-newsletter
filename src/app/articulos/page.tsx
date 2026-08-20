@@ -13,7 +13,7 @@ function formatDate(d: string) {
 }
 
 export default async function ArticlesIndexPage() {
-  const items = await listPublishedArticles()
+  const items = (await listPublishedArticles()).filter(a => a.slug !== 'el-caso-japon')
 
   return (
     <div className="container-apple pt-24 pb-32">
@@ -21,7 +21,7 @@ export default async function ArticlesIndexPage() {
         <p className="eyebrow">Lecturas</p>
         <h1 className="mt-4 text-display">Artículos</h1>
         <p className="mt-4 text-[17px] text-ink-soft max-w-xl mx-auto">
-          Análisis más largos en PDF sobre temas que me interesan.
+          Análisis extensos sobre temas que me interesan.
         </p>
       </header>
 
@@ -39,6 +39,28 @@ export default async function ArticlesIndexPage() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Link href="/articulos/el-caso-japon" className="card card-hover overflow-hidden flex flex-col">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/articles/el-caso-japon/linkedin-cover.jpg"
+              alt=""
+              className="w-full aspect-[16/10] object-cover"
+            />
+            <div className="p-6 flex flex-col flex-1">
+              <time className="text-[12px] text-ink-mute">21 de agosto de 2026</time>
+              <h3 className="mt-2 text-[18px] font-semibold tracking-tight text-ink">El caso Japón. La gran anomalía monetaria.</h3>
+              <p className="mt-2 text-[14px] text-ink-soft line-clamp-3 flex-1">
+                Han pasado 55 años desde que Richard Nixon salió a la palestra para anunciar una decisión que cambiaría para siempre el sistema monetario.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {['Japón', 'Política monetaria', 'Divisas'].map(tag => (
+                  <span key={tag} className="text-[11px] text-ink-soft bg-canvas-alt px-2 py-1 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </Link>
           {items.map(a => (
             <Link key={a.id} href={`/articulos/${a.slug}`} className="card card-hover overflow-hidden flex flex-col">
               {a.cover_url ? (
@@ -76,4 +98,3 @@ export default async function ArticlesIndexPage() {
     </div>
   )
 }
-
