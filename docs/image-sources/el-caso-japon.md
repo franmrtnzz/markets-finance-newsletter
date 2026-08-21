@@ -49,7 +49,7 @@
 
 ## Scott Bessent en la sala de prensa de la Casa Blanca
 
-- Uso: imagen interior desplazada de la sección «El problema cruza el Pacífico», en web y email.
+- Uso: imagen interior de la sección «El problema cruza el Pacífico», en web y email.
 - Archivo local: `public/images/articles/el-caso-japon/scott-bessent-briefing.jpg`.
 - Título: «Treasury Secretary Scott Bessent holds a White House Press Briefing».
 - Autor: Abe McNatt, fotógrafo oficial de la Casa Blanca.

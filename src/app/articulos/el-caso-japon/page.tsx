@@ -124,7 +124,7 @@ export default function ElCasoJaponPage() {
                     )}
 
                     {section.id === 'takaichi' && paragraphIndex === 0 && (
-                      <figure className="japan-article__figure">
+                      <figure className="japan-article__figure japan-article__figure--wide">
                         <Image
                           src={japanArticleImages.takaichiDietSpeech}
                           alt="Sanae Takaichi pronunciando su discurso de política general ante la Dieta japonesa"
@@ -139,7 +139,7 @@ export default function ElCasoJaponPage() {
                     )}
 
                     {section.id === 'el-problema-cruza-el-pacifico' && paragraphIndex === 1 && (
-                      <figure className="japan-article__figure japan-article__figure--portrait-right">
+                      <figure className="japan-article__figure japan-article__figure--wide">
                         <Image
                           src={japanArticleImages.scottBessentBriefing}
                           alt="Scott Bessent durante una comparecencia en la sala de prensa de la Casa Blanca"
