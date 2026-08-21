@@ -35,3 +35,25 @@
 - URL: https://commons.wikimedia.org/wiki/File:Bank_of_Japan_headquarters_in_Tokyo,_Japan.jpg
 - Licencia: dominio público, cedido por el autor.
 - Modificación: reducción proporcional para uso web.
+
+## Sanae Takaichi ante la Dieta japonesa
+
+- Uso: imagen interior de la sección «Takaichi: la dama de hierro japonesa», en web y email.
+- Archivo local: `public/images/articles/el-caso-japon/takaichi-press-conference.jpg`.
+- Título: «Takaichi speaks at the National Diet 2025-10-24».
+- Autor: Cabinet Public Affairs Office de Japón.
+- Fuente: Wikimedia Commons; original publicado por la Oficina del Primer Ministro de Japón.
+- URL: https://commons.wikimedia.org/wiki/File:Takaichi_speaks_at_the_National_Diet_2025-10-24.jpg
+- Licencia: CC BY 4.0, compatible con la Public Data License de Japón.
+- Modificación: reducción proporcional para uso web; sin alteración del contenido de la fotografía.
+
+## Scott Bessent en la sala de prensa de la Casa Blanca
+
+- Uso: imagen interior desplazada de la sección «El problema cruza el Pacífico», en web y email.
+- Archivo local: `public/images/articles/el-caso-japon/scott-bessent-briefing.jpg`.
+- Título: «Treasury Secretary Scott Bessent holds a White House Press Briefing».
+- Autor: Abe McNatt, fotógrafo oficial de la Casa Blanca.
+- Fuente: Wikimedia Commons; original de la Casa Blanca.
+- URL: https://commons.wikimedia.org/wiki/File:P20260528AM-0092_Treasury_Secretary_Scott_Bessent_holds_a_White_House_Press_Briefing_(cropped).jpg
+- Licencia: dominio público como obra del Gobierno federal de Estados Unidos.
+- Modificación: recorte publicado por Wikimedia Commons y reducción proporcional para uso web.

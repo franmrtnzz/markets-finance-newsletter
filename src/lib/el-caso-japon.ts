@@ -46,4 +46,6 @@ export const japanArticleImages = {
   linkedinCover: '/images/articles/el-caso-japon/linkedin-cover.jpg',
   nixonSpeech: '/images/articles/el-caso-japon/nixon-speech.jpg',
   bankOfJapan: '/images/articles/el-caso-japon/bank-of-japan.jpg',
+  takaichiDietSpeech: '/images/articles/el-caso-japon/takaichi-press-conference.jpg',
+  scottBessentBriefing: '/images/articles/el-caso-japon/scott-bessent-briefing.jpg',
 } as const

@@ -122,6 +122,36 @@ export default function ElCasoJaponPage() {
                         </figcaption>
                       </figure>
                     )}
+
+                    {section.id === 'takaichi' && paragraphIndex === 0 && (
+                      <figure className="japan-article__figure">
+                        <Image
+                          src={japanArticleImages.takaichiDietSpeech}
+                          alt="Sanae Takaichi pronunciando su discurso de política general ante la Dieta japonesa"
+                          width={1920}
+                          height={1280}
+                          sizes="(max-width: 900px) 100vw, 688px"
+                        />
+                        <figcaption>
+                          Sanae Takaichi durante su discurso de política general ante la Dieta, el 24 de octubre de 2025. Fotografía: Cabinet Public Affairs Office, CC BY 4.0.
+                        </figcaption>
+                      </figure>
+                    )}
+
+                    {section.id === 'el-problema-cruza-el-pacifico' && paragraphIndex === 1 && (
+                      <figure className="japan-article__figure japan-article__figure--portrait-right">
+                        <Image
+                          src={japanArticleImages.scottBessentBriefing}
+                          alt="Scott Bessent durante una comparecencia en la sala de prensa de la Casa Blanca"
+                          width={1767}
+                          height={1326}
+                          sizes="(max-width: 900px) 100vw, 560px"
+                        />
+                        <figcaption>
+                          Scott Bessent durante una comparecencia en la Casa Blanca, el 28 de mayo de 2026. Fotografía oficial de la Casa Blanca · Abe McNatt.
+                        </figcaption>
+                      </figure>
+                    )}
                   </div>
                 ))}
               </section>
